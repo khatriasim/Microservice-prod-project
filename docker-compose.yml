@@ -1,0 +1,152 @@
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    networks:
+      - microservices-network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - microservices-network
+
+  property-service:
+    build: ./property-service
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://fastapi_user:password123@property-db:5432/fastapi_db
+      - KAFKA_BROKER=kafka:9092
+      - REDIS_URL=redis://redis-property:6379
+      - JWT_SECRET=09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7 
+    depends_on:
+      - property-db
+      - kafka
+      - redis-property
+    networks:
+      - microservices-network
+    labels:
+      - "traefik.http.routers.property.rule=PathPrefix(`/api`)"
+      - "traefik.http.services.property.loadbalancer.server.port=8000"
+
+  property-db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: fastapi_user
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: fastapi_db
+    volumes:
+      - property-db-data:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"        
+    networks:
+      - microservices-network
+
+  redis-property:
+    image: redis:7-alpine
+    networks:
+      - microservices-network
+
+  notification-service:
+    build: ./notification-service
+    ports:
+      - "8001:8000"
+    environment:
+      - KAFKA_BROKER=kafka:9092
+      - REDIS_URL=redis://redis-notification:6379
+      - CELERY_BROKER_URL=redis://redis-notification:6379
+      - DATABASE_URL=postgresql://django_user:password123@notification-db:5432/django_db
+      - JWT_SECRET=09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7 
+    depends_on:
+      - kafka
+      - notification-db
+      - redis-notification
+    networks:
+      - microservices-network
+    labels:
+      - "traefik.http.routers.notification.rule=PathPrefix(`/notify`)"
+      - "traefik.http.services.notification.loadbalancer.server.port=8001"
+
+  celery-worker:
+    build: ./notification-service
+    command: celery -A mysite.celry worker --loglevel=info
+    environment:
+      - CELERY_BROKER_URL=redis://redis-notification:6379
+      - KAFKA_BROKER=kafka:9092
+      - DATABASE_URL=postgresql://django_user:password123@notification-db:5432/django_db
+    depends_on:
+      - redis-notification
+      - kafka
+      - notification-db
+    networks:
+      - microservices-network
+
+
+  kafka-consumer:
+    build: ./notification-service
+    command: python manage.py consume_property_events
+    environment:
+      - PYTHONUNBUFFERED=1
+      - KAFKA_BROKER=kafka:9092
+      - CELERY_BROKER_URL=redis://redis-notification:6379
+      - DATABASE_URL=postgresql://django_user:password123@notification-db:5432/django_db
+    depends_on:
+      - kafka
+      - redis-notification
+      - notification-db
+    networks:
+      - microservices-network
+
+
+
+  notification-db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: django_user
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: django_db
+    volumes:
+      - notification-db-data:/var/lib/postgresql/data
+    ports:
+    - "5433:5432"
+    networks:
+      - microservices-network
+
+  redis-notification:
+    image: redis:7-alpine
+    networks:
+      - microservices-network
+
+  traefik:
+    image: traefik:v3.6.16
+    user: root
+    environment:
+      DOCKER_API_VERSION: "1.40"
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /home/asim/.docker/desktop/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - microservices-network
+
+volumes:
+  property-db-data:
+  notification-db-data:
+
+
+networks:
+  microservices-network:
+    driver: bridge
