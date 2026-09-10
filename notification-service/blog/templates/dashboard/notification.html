@@ -1,0 +1,82 @@
+{% extends 'dashboard/base.html' %}
+{% block notifs_active %}active{% endblock %}
+
+{% block content %}
+
+<h3 class="mb-4">📝 All Notifications ({{ total_notification }})</h3>
+
+<div class="table-card">
+    <table class="table table-hover">
+
+        <thead class="table-dark">
+            <tr>
+                <th>Notification Type</th>
+                <th>Post</th>
+                <th>Message Status</th>
+                <th>Sender</th>
+                <th>Receiver</th>
+                <th>Summary</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for notify in notification %}
+            <tr>
+
+                <td>{{ notify.notification_type }}</td>
+
+                <td>{{ notify.post }}</td>
+
+                <td>
+                    {% if notify.is_read %}
+                        <span class="badge bg-success">Seen</span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark">Not Seen</span>
+                    {% endif %}
+                </td>
+
+                <td>{{ notify.sender.username }}</td>
+
+                <td>{{ notify.user.username }}</td>
+
+                <td>
+
+                    {% if notify.notification_type == 'follow' %}
+
+                        {{ notify.sender.username }} followed {{ notify.user.username }}
+
+                    {% elif notify.notification_type == 'comment' %}
+
+                        {{ notify.sender.username }} commented on {{notify.post.author}} post
+
+                    {% elif notify.notification_type == 'like-comment' %}
+
+                        {{ notify.sender.username }} liked {{ notify.user.username}} comment on  {{notify.post.author}} post
+
+                    {% elif notify.notification_type == 'new_post' %}
+
+                        {{ notify.sender.username }} created a new post
+
+                    {% elif notify.notification_type == 'like' %}
+
+                        {{ notify.sender.username }} liked {{notify.user.username}} post
+
+                    {% else %}
+
+                        Notification activity
+
+                    {% endif %}
+
+                </td>
+
+                <td>{{ notify.created_at|date:"M d, Y" }}</td>
+
+            </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+</div>
+
+{% endblock %}

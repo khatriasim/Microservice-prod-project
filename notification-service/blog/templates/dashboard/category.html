@@ -1,0 +1,56 @@
+{% extends 'dashboard/base.html' %}
+{% block category_active %}active{% endblock %}
+
+{% block content %}
+<div class="flex justify-between align-items-center mb-3">
+    <h3>📂 Manage Categories ({{ total_category }})</h3>
+</div>
+
+<!-- Add Category Form -->
+<div class="card mb-4">
+    <div class="card-body">
+        <h5>Add New Category</h5>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="mb-2">
+                <input type="text" name="name" class="form-control" placeholder="Category name" required>
+            </div>
+            <div class="mb-2">
+                <textarea name="description" class="form-control" placeholder="Description (optional)"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Category</button>
+        </form>
+    </div>
+</div>
+
+<!-- Category Table -->
+<div class="table-card">
+    <table class="table table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cat in categories %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ cat.name }}</td>
+                <td>{{ cat.description|default:"—" }}</td>
+                <td>{{ cat.created_at|date:"M d, Y" }}</td>
+                <td>
+             <a href="{% url 'edit-category' cat.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                <a href="{% url 'delete-category' cat.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="text-center text-muted">No categories yet.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

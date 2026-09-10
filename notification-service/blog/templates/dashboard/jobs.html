@@ -1,0 +1,32 @@
+{% extends 'dashboard/base.html' %}
+{% block jobs_active %}active{% endblock %}
+
+{% block content %}
+<h3 class="mb-4">💼 All Jobs ({{ total_jobs }})</h3>
+<div class="table-card">
+    <table class="table table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Title</th>
+                <th>Company</th>
+                <th>Location</th>
+                <th>Status</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for job in jobs %}
+            <tr>
+                <td>{{ job.title }}</td>
+                <td>{{ job.company }}</td>
+                <td>{{ job.location }}</td>
+                <td>
+                    <span class="badge bg-info">{{ job.status }}</span>
+                </td>
+                <td>{{ job.created_at|date:"M d, Y" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

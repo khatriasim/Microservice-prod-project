@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body { background: #f8f9fa; }
+
+        .sidebar {
+            height: 100vh;
+            background: #2c3e50;
+            position: fixed;
+            width: 250px;
+            padding-top: 20px;
+        }
+
+        .sidebar a {
+            color: #ecf0f1;
+            padding: 12px 20px;
+            display: block;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .sidebar a:hover {
+            background: #34495e;
+            color: white;
+        }
+
+        .sidebar .active {
+            background: #3498db;
+            color: white;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            padding: 30px;
+        }
+
+        .stat-card {
+            border-radius: 15px;
+            padding: 25px;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .stat-card h2 { font-size: 2.5rem; font-weight: bold; }
+        .stat-card p  { font-size: 1rem; opacity: 0.8; }
+
+        .bg-users    { background: linear-gradient(135deg, #3498db, #2980b9); }
+        .bg-posts    { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+        .bg-jobs     { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        .bg-notifs   { background: linear-gradient(135deg, #f39c12, #d68910); }
+
+        .table-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="text-center mb-4">
+        <h5 class="text-white">
+            <i class="bi bi-grid-fill"></i> Dashboard
+        </h5>
+    </div>
+    <a href="/dashboard/" class="{% block home_active %}{% endblock %}">
+        <i class="bi bi-house-fill"></i> Overview
+    </a>
+    <a href="/dashboard/users/" class="{% block users_active %}{% endblock %}">
+        <i class="bi bi-people-fill"></i> Users
+    </a>
+    <a href="/dashboard/posts/" class="{% block posts_active %}{% endblock %}">
+        <i class="bi bi-file-text-fill"></i> Posts
+    </a>
+    <a href="/dashboard/jobs/" class="{% block jobs_active %}{% endblock %}">
+        <i class="bi bi-briefcase-fill"></i> Jobs
+    </a>
+    <a href="/dashboard/notification/" class="{% block notifs_active %}{% endblock %}">
+        <i class="bi bi-bell-fill"></i> Notifications
+    </a>
+    <hr style="border-color: #34495e;">
+    <a href="/admin/">
+        <i class="bi bi-gear-fill"></i> Django Admin
+    </a>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    {% block content %}
+    {% endblock %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

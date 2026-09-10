@@ -1,0 +1,158 @@
+{% extends 'dashboard/base.html' %}
+{% block home_active %}active{% endblock %}
+
+{% block content %}
+<h3 class="mb-4">📊 Overview</h3>
+
+<!-- Stat Cards -->
+<div class="row">
+    <div class="col-md-3">
+        <div class="stat-card bg-users">
+            <p><i class="bi bi-people-fill"></i> Total Users</p>
+            <h2>{{ total_users }}</h2>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card bg-posts">
+            <p><i class="bi bi-file-text-fill"></i> Total Posts</p>
+            <h2>{{ total_posts }}</h2>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card bg-jobs">
+            <p><i class="bi bi-briefcase-fill"></i> Jobs Scraped</p>
+            <h2>{{ total_jobs }}</h2>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card bg-notifs">
+            <p><i class="bi bi-bell-fill"></i> Notifications</p>
+            <h2>{{ total_notifications }}</h2>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Posts -->
+<div class="table-card mt-4">
+    <h5 class="mb-3">📝 Recent Posts</h5>
+    <table class="table table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Status</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for post in recent_posts %}
+            <tr>
+                <td>{{ post.title }}</td>
+                <td>{{ post.author.username }}</td>
+                <td>
+                    {% if post.status == 'published' %}
+                        <span class="badge bg-success">Published</span>
+                    {% else %}
+                        <span class="badge bg-warning">Draft</span>
+                    {% endif %}
+                </td>
+                <td>{{ post.created_at|date:"M d, Y" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Recent Users -->
+<div class="table-card mt-4">
+    <h5 class="mb-3">👥 Recent Users</h5>
+    <table class="table table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Joined</th>
+                <th>Staff</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in recent_users %}
+            <tr>
+                <td>{{ user.username }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                <td>
+                    {% if user.is_staff %}
+                        <span class="badge bg-danger">Admin</span>
+                    {% else %}
+                        <span class="badge bg-secondary">User</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="table-card mt-4">
+    <h5 class="mb-3">📊 Content Distribution</h5>
+    <div style="display:flex; flex-wrap:wrap; gap:16px; margin-bottom:12px; font-size:13px;">
+        <span style="display:flex; align-items:center; gap:6px;">
+            <span style="width:10px;height:10px;border-radius:2px;background:#7F77DD;display:inline-block;"></span>
+            Users ({{ total_users }})
+        </span>
+        <span style="display:flex; align-items:center; gap:6px;">
+            <span style="width:10px;height:10px;border-radius:2px;background:#1D9E75;display:inline-block;"></span>
+            Posts ({{ total_posts }})
+        </span>
+        <span style="display:flex; align-items:center; gap:6px;">
+            <span style="width:10px;height:10px;border-radius:2px;background:#D85A30;display:inline-block;"></span>
+            Jobs ({{ total_jobs }})
+        </span>
+        <span style="display:flex; align-items:center; gap:6px;">
+            <span style="width:10px;height:10px;border-radius:2px;background:#BA7517;display:inline-block;"></span>
+            Notifications ({{ total_notifications }})
+        </span>
+    </div>
+    <div style="position:relative; width:100%; height:300px;">
+        <canvas id="overviewChart"
+            role="img"
+            aria-label="Doughnut chart showing distribution across users, posts, jobs and notifications">
+            Users: {{ total_users }}, Posts: {{ total_posts }},
+            Jobs: {{ total_jobs }}, Notifications: {{ total_notifications }}
+        </canvas>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    new Chart(document.getElementById('overviewChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Users', 'Posts', 'Jobs', 'Notifications'],
+            datasets: [{
+                data: [
+                    {{ total_users }},
+                    {{ total_posts }},
+                    {{ total_jobs }},
+                    {{ total_notifications }}
+                ],
+                backgroundColor: ['#7F77DD', '#1D9E75', '#D85A30', '#BA7517'],
+                borderColor:     ['#534AB7', '#0F6E56', '#993C1D', '#854F0B'],
+                borderWidth: 1,
+                hoverOffset: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }   
+            }
+        }
+    });
+</script>
+{% endblock %}

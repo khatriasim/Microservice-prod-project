@@ -1,0 +1,45 @@
+{% extends 'dashboard/base.html' %}
+{% block posts_active %}active{% endblock %}
+
+{% block content %}
+<div class="card mt-4" style="max-width: 600px;">
+    <div class="card-body">
+        <h4>✏️ Edit Post</h4>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label">Title</label>
+                <input type="text" name="title" class="form-control" 
+                       value="{{ post.title }}" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Content</label>
+                <textarea name="content" class="form-control" 
+                          rows="4">{{ post.content }}</textarea>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Category</label>
+                <select name="category" class="form-control" multiple>
+                    {% for cat in categories %}
+                        <option value="{{ cat.name }}"
+                            {% for pc in post.categories.all %}
+                                {% if pc.id == cat.id %}selected{% endif %}
+                            {% endfor %}>
+                            {{ cat.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Status</label><br>
+                <input type="radio" name="status" value="published"
+                    {% if post.status == 'published' %}checked{% endif %}> Published
+                <input type="radio" name="status" value="draft"
+                    {% if post.status == 'draft' %}checked{% endif %}> Draft
+            </div>
+            <button type="submit" class="btn btn-warning">Save Changes</button>
+            <a href="{% url 'dashboard-posts' %}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

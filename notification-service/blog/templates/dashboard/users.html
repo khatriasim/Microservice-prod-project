@@ -1,0 +1,50 @@
+{% extends 'dashboard/base.html' %}
+{% block users_active %}active{% endblock %}
+
+{% block content %}
+<h3 class="mb-4">👥 All Users ({{ total_users }})</h3>
+<div class="table-card">
+    <table class="table table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Joined</th>
+                <th>Staff</th>
+                <th>Active</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.username }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                <td>
+                    {% if user.is_staff %}
+                        <span class="badge bg-danger">Admin</span>
+                    {% else %}
+                        <span class="badge bg-secondary">User</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if user.is_active %}
+                        <span class="badge bg-success">Active</span>
+                    {% else %}
+                        <span class="badge bg-danger">Inactive</span>
+                    {% endif %}
+                </td>
+                  <td>
+                {% if not user.is_staff %}
+                <a href="{% url 'delete-user' user.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                {% else %}
+                <span class="text-muted">--</span>
+                {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

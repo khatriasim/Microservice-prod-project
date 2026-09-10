@@ -1,0 +1,40 @@
+# .env
+# venv/
+# __pycache__/
+# *.pyc
+
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.pyc
+
+# Virtual environment
+venv/
+env/
+.env/
+
+# Environment variables (IMPORTANT — never push!)
+.env
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+media/
+
+# Docker
+postgres_data/
+
+# VS Code
+.vscode/
+
+# Mac
+.DS_Store
+
+# Migrations (optional — some push these)
+# blog/migrations/
+# myapp/migrations/
