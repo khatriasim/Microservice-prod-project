@@ -106,11 +106,14 @@ class PropertyQuery:
         db = SessionLocal()
         try:
             profile = build_user_profile(db, int(user_id))
+            print(f"USER PROFILE: {profile}")
 
             candidates = db.query(Property).filter(Property.status == "available", ~Property.id.in_(profile["favorited_property_ids"]) if profile["favorited_property_ids"] else True
             ).all()
 
             scored = [(p, score_property(p, profile)) for p in candidates]
+            for p, s in scored:
+                print(f"Property {p.id} | {p.title} | {p.city} | price={p.price} | bd={p.bedrooms} | SCORE={s}")
             scored.sort(key=lambda x: x[1], reverse=True)
             top = scored[:limit]
 

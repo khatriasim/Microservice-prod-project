@@ -41,6 +41,8 @@ def build_user_profile(db: Session, user_id: int) -> dict:
         "favorited_property_ids": {p.id for p in favorited_properties},
     }
     return profile
+
+    
 def score_property(prop: Property, profile: dict) -> float:
     score = 0.0
 
