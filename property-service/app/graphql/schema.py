@@ -3,6 +3,8 @@ from app.graphql.queries.property import PropertyQuery
 from app.graphql.queries.booking import BookingQuery
 from app.graphql.mutations.property import PropertyMutation
 from app.graphql.mutations.booking import BookingMutation
+from app.graphql.mutations.favorite import FavouriteMutation
+from app.graphql.queries.favorite import FavoriteQuery
 from app.core.security import decoded_token
 from app.models.user import User
 from fastapi import Request
@@ -31,10 +33,10 @@ async def get_context(request: Request) -> dict:
 
         return {"db": db, "user_id": user_id, "user_name":user_name, "user_email":user_email, "request": request}
 @strawberry.type
-class Mutation(PropertyMutation, BookingMutation):
+class Mutation(PropertyMutation, BookingMutation, FavouriteMutation):
                pass
 @strawberry.type
-class Query(PropertyQuery, BookingQuery):
+class Query(PropertyQuery, BookingQuery, FavoriteQuery):
         pass
 
 schema = strawberry.Schema(query=Query, mutation=Mutation)

@@ -14,6 +14,8 @@ class PropertyType:
     bathrooms: Optional[int] = None
     area: Optional[float] = None
     address: Optional[str] = None
+    property_type: Optional[str] = None
+    agent_email : Optional[str] = None
 
 
 

@@ -4,12 +4,13 @@ from typing import List, Optional
 from app.graphql.types.property import PropertyType
 from app.core.database import SessionLocal
 from app.models.property import Property
-
+from app.models.search_log import SearchLog
+from app.core.recommendation import build_user_profile, score_property
 @strawberry.type
 class PropertyQuery:
 
     @strawberry.field
-    def properties(self,
+    def properties(self, info:Info,
                    city: Optional[str] = None,
                    min_price: Optional[float] = None,
                    max_price: Optional[float] = None,
@@ -32,6 +33,18 @@ class PropertyQuery:
                 query = query.filter(Property.property_type == property_type)
             # agent_name filter removed — no local User table to join against.
             # Reintroduce once user_profiles cache table exists (join on that instead).
+            user_id = info.context.get("user_id")
+            if user_id and (city or min_price or max_price or bedrooms or property_type):
+                log = SearchLog(
+                    user_id=int(user_id),
+                    city = city,
+                    min_price=min_price,
+                    max_price=max_price,
+                    bedrooms=bedrooms,
+                    property_type=property_type,
+                )
+                db.add(log)
+                db.commit()
 
             props = query.all()
             return [
@@ -79,6 +92,45 @@ class PropertyQuery:
                     address=p.address,
                 )
                 for p in props
+            ]
+        finally:
+            db.close()
+
+
+    @strawberry.field
+    def recommended_properties(self, info: Info, limit: int = 10) -> List[PropertyType]:
+        user_id = info.context.get("user_id")
+        if not user_id:
+            raise Exception("Not authenticated")
+
+        db = SessionLocal()
+        try:
+            profile = build_user_profile(db, int(user_id))
+
+            candidates = db.query(Property).filter(Property.status == "available", ~Property.id.in_(profile["favorited_property_ids"]) if profile["favorited_property_ids"] else True
+            ).all()
+
+            scored = [(p, score_property(p, profile)) for p in candidates]
+            scored.sort(key=lambda x: x[1], reverse=True)
+            top = scored[:limit]
+
+            return [
+                PropertyType(
+                    id=p.id,
+                    title=p.title,
+                    price=p.price,
+                    city=p.city,
+                    status=p.status,
+                    agent_id=p.agent_user_id,
+                    agent_name=p.agent_name,
+                    agent_email=p.agent_email,
+                    description=p.description,
+                    bedrooms=p.bedrooms,
+                    bathrooms=p.bathrooms,
+                    area=p.area,
+                    address=p.address,
+                )
+                for p, score in top
             ]
         finally:
             db.close()
