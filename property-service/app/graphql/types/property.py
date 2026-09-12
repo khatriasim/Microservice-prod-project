@@ -24,7 +24,7 @@ class CreatePropertyInput:
     title: str
     price: float
     city: str
-    property_type: str = "apartment"
+    property_type: Optional[str] = None
     description: Optional[str] = None
     bedrooms: Optional[int] = None
     bathrooms: Optional[int] = None

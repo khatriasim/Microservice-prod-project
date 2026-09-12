@@ -18,6 +18,28 @@ services:
     networks:
       - microservices-network
 
+  # property-service:
+  #   build: ./property-service
+  #   ports:
+  #     - "8000:8000"
+  #   environment:
+  #     - DATABASE_URL=postgresql://fastapi_user:password123@property-db:5432/fastapi_db
+  #     - KAFKA_BROKER=kafka:9092
+  #     - REDIS_URL=redis://redis-property:6379
+  #     - JWT_SECRET=09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7 
+  #   depends_on:
+  #     - property-db
+  #     - kafka
+  #     - redis-property
+  #   networks:
+  #     - microservices-network
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.property.rule=PathPrefix(`/graphql`)"
+  #     - "traefik.http.routers.property.middlewares=property-ratelimit"
+  #     - "traefik.http.middlewares.property-ratelimit.ratelimit.average=20"
+  #     - "traefik.http.middlewares.property-ratelimit.ratelimit.burst=40"
+  #     - "traefik.http.services.property.loadbalancer.server.port=8000"
   property-service:
     build: ./property-service
     ports:
@@ -26,7 +48,7 @@ services:
       - DATABASE_URL=postgresql://fastapi_user:password123@property-db:5432/fastapi_db
       - KAFKA_BROKER=kafka:9092
       - REDIS_URL=redis://redis-property:6379
-      - JWT_SECRET=09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7 
+      - JWT_SECRET=09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7
     depends_on:
       - property-db
       - kafka
@@ -34,8 +56,17 @@ services:
     networks:
       - microservices-network
     labels:
-      - "traefik.http.routers.property.rule=PathPrefix(`/api`)"
+      - "traefik.enable=true"
+      - "traefik.http.routers.property.rule=PathPrefix(`/graphql`)"
+      - "traefik.http.routers.property.middlewares=property-ratelimit,cors"
+      - "traefik.http.middlewares.property-ratelimit.ratelimit.average=20"
+      - "traefik.http.middlewares.property-ratelimit.ratelimit.burst=40"
+      - "traefik.http.middlewares.cors.headers.accesscontrolallowmethods=GET,POST,OPTIONS"
+      - "traefik.http.middlewares.cors.headers.accesscontrolalloworiginlist=http://localhost:3000"
+      - "traefik.http.middlewares.cors.headers.accesscontrolallowheaders=Content-Type,Authorization"
+      - "traefik.http.middlewares.cors.headers.accesscontrolallowcredentials=true"
       - "traefik.http.services.property.loadbalancer.server.port=8000"
+
 
   property-db:
     image: postgres:16
@@ -55,6 +86,26 @@ services:
     networks:
       - microservices-network
 
+  # notification-service:
+  #   build: ./notification-service
+  #   ports:
+  #     - "8001:8000"
+  #   environment:
+  #     - KAFKA_BROKER=kafka:9092
+  #     - REDIS_URL=redis://redis-notification:6379
+  #     - CELERY_BROKER_URL=redis://redis-notification:6379
+  #     - DATABASE_URL=postgresql://django_user:password123@notification-db:5432/django_db
+  #     - JWT_SECRET=09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7 
+  #   depends_on:
+  #     - kafka
+  #     - notification-db
+  #     - redis-notification
+  #   networks:
+  #     - microservices-network
+  #   labels:
+  #     - "traefik.http.routers.notification.rule=PathPrefix(`/api`)"
+  #     - "traefik.http.services.notification.loadbalancer.server.port=8001"
+
   notification-service:
     build: ./notification-service
     ports:
@@ -64,7 +115,7 @@ services:
       - REDIS_URL=redis://redis-notification:6379
       - CELERY_BROKER_URL=redis://redis-notification:6379
       - DATABASE_URL=postgresql://django_user:password123@notification-db:5432/django_db
-      - JWT_SECRET=09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7 
+      - JWT_SECRET=09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7
     depends_on:
       - kafka
       - notification-db
@@ -72,9 +123,10 @@ services:
     networks:
       - microservices-network
     labels:
-      - "traefik.http.routers.notification.rule=PathPrefix(`/notify`)"
-      - "traefik.http.services.notification.loadbalancer.server.port=8001"
-
+      - "traefik.enable=true"
+      - "traefik.http.routers.notification.rule=PathPrefix(`/api`)"
+      - "traefik.http.routers.notification.middlewares=cors"
+      - "traefik.http.services.notification.loadbalancer.server.port=8000"
   celery-worker:
     build: ./notification-service
     command: celery -A mysite.celry worker --loglevel=info
@@ -134,6 +186,8 @@ services:
       - "--api.insecure=true"
       - "--providers.docker=true"
       - "--entrypoints.web.address=:80"
+      - "--accesslog=true"
+      - "--accesslog.format=json"
     ports:
       - "80:80"
       - "8080:8080"

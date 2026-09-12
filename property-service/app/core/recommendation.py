@@ -17,7 +17,7 @@ def build_user_profile(db: Session, user_id: int) -> dict:
 
     for s in searches:
         if s.city:
-            cities[s.city] += 1
+            cities[s.city.strip().lower()] += 1
         if s.property_type:
             property_types[s.property_type] += 1
         if s.bedrooms:
@@ -28,7 +28,7 @@ def build_user_profile(db: Session, user_id: int) -> dict:
             prices.append(s.max_price)
 
     for p in favorited_properties:
-        cities[p.city] += 3
+        cities[p.city.strip().lower()] += 3
         property_types[p.property_type] += 3
         bedrooms_list.extend([p.bedrooms] * 3 if p.bedrooms else [])
         prices.extend([p.price] * 3)
@@ -42,11 +42,11 @@ def build_user_profile(db: Session, user_id: int) -> dict:
     }
     return profile
 
-    
+
 def score_property(prop: Property, profile: dict) -> float:
     score = 0.0
 
-    if profile["preferred_city"] and prop.city == profile["preferred_city"]:
+    if profile["preferred_city"] and prop.city.strip().lower() == profile["preferred_city"]:
         score += 40
 
     if profile["preferred_avg_price"] and prop.price:

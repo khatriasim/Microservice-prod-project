@@ -94,7 +94,7 @@ class LoginView(APIView):
             httponly = True,
             secure = not settings.DEBUG,
             samesite='Strict',
-            max_age = 604800
+            max_age = 60 * 60 * 24 * 3, 
         )
 
         response.set_cookie(
@@ -103,7 +103,7 @@ class LoginView(APIView):
             httponly=True,
             secure=not settings.DEBUG,
             samesite='Strict',
-            max_age=86400 * 7,
+            max_age=60 * 60 * 24 * 60, 
         )
 
         return response

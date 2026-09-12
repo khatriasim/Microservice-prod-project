@@ -203,8 +203,8 @@ if not JWT_SECRET:
     warnings.warn("JWT_SECRET is not set — tokens will be signed with an empty key!")
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=3),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=60),
     'ALGORITHM': 'HS256',
     'SIGNING_KEY': JWT_SECRET,
 }

@@ -66,6 +66,7 @@ class PropertyMutation:
                 bathrooms=new_property.bathrooms,
                 area=new_property.area,
                 address=new_property.address,
+                property_type = new_property.property_type,
             )
         finally:
             db.close()
