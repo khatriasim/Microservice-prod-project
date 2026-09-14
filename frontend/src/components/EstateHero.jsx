@@ -1,9 +1,14 @@
 "use client";
+import  { AuthSection} from "@/components/AuthSection"
 import Link from "next/link";
+import {
+  ArrowRight,
+  Home,
+} from "lucide-react";
+import  { useAuth } from "@/hooks/useAuth"
 
 import Image from "next/image";
 import {
-  ArrowRight,
   ArrowUpRight,
   Heart,
   MessageCircle,
@@ -35,27 +40,12 @@ const IMAGES = {
 function Logo() {
   return (
     <a href="#" className="flex items-center gap-2 shrink-0" aria-label="EstateHub home">
-      <svg
-        width="130"
-        height="33"
-        viewBox="0 0 205 52"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="lg:w-[205px] lg:h-[52px] w-[130px] h-[33px]"
-      >
-        <rect width="205" height="52" rx="8" fill="#1a3d1a" />
-        <text
-          x="50%"
-          y="34"
-          textAnchor="middle"
-          fill="#fff"
-          fontFamily="DM Serif Display, Georgia, serif"
-          fontSize="28"
-          letterSpacing="-0.02em"
-        >
-          EstateHub
-        </text>
-      </svg>
+                   <span className="grid h-11 w-11 place-items-center rounded-xl bg-orange text-white shadow-lg shadow-orange/30">
+                <Home size={22} strokeWidth={2.2} />
+              </span>
+              <span className="font-serif-display text-2xl tracking-wide">
+                EstateHub
+              </span>
     </a>
   );
 }
@@ -92,7 +82,7 @@ function AvatarStack({ size = "w-6 h-6", plus = true }) {
   );
 }
 
-function Header() {
+function Header({ user, loading, logout }) {
   return (
     <header className="relative z-30 shrink-0 w-full px-6 lg:px-12 py-4 flex items-center justify-between animate-fade-in delay-200">
       <Logo />
@@ -145,19 +135,7 @@ function Header() {
           </span>
         </a>
 
-        <a
-          href="#"
-          aria-label="Agent profile"
-          className="ml-1 h-10 w-10 rounded-full overflow-hidden ring-2 ring-transparent hover:ring-orange/30 transition-all shrink-0"
-        >
-          <Image
-            src={IMAGES.agent}
-            alt="Real estate agent"
-            width={128}
-            height={128}
-            className="w-full h-full object-cover"
-          />
-        </a>
+        <AuthSection user={user} loading={loading} logout={logout} />
       </div>
     </header>
   );
@@ -487,9 +465,11 @@ function MobileHero() {
 }
 
 export default function EstateHero() {
+  const { user, loading, logout } = useAuth();
+
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-background">
-      <Header />
+      <Header user={user} loading={loading} logout={logout} />
       <main className="relative flex-1 flex flex-col overflow-hidden">
         <DesktopHero />
         <TabletHero />

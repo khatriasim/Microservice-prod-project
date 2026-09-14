@@ -137,3 +137,31 @@ class PropertyQuery:
             ]
         finally:
             db.close()
+
+
+@strawberry.field
+def view_property(self, info: Info, id: int) -> Optional[PropertyType]:
+    db = SessionLocal()
+    try:
+        prop = db.query(Property).filter(Property.id == id).first()
+        if not prop:
+            return None
+
+        return PropertyType(
+            id=prop.id,
+            title=prop.title,
+            price=prop.price,
+            city=prop.city,
+            status=prop.status,
+            agent_id=prop.agent_user_id,
+            agent_name=prop.agent_name,
+            agent_email=prop.agent_email,
+            description=prop.description,
+            bedrooms=prop.bedrooms,
+            bathrooms=prop.bathrooms,
+            area=prop.area,
+            address=prop.address,
+            property_type=prop.property_type,
+        )
+    finally:
+        db.close()

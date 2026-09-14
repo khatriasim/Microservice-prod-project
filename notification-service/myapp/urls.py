@@ -1,7 +1,8 @@
 from .views import RegisterView, LoginView, ProfileView, LogoutView, ChangePasswordView, UpdateProfileView
-from .views import VerifyOTPView, GoogleLoginView, ResendOTPView, ResetPassword
+from .views import VerifyOTPView, GoogleLoginView, ResendOTPView, ResetPassword, VerifyTokenView
 from rest_framework_simplejwt.views import TokenRefreshView
 from django.urls import path
+
 from drf_spectacular.utils import extend_schema
 
 TaggedTokenRefreshView = extend_schema(tags=['Auth'])(TokenRefreshView)
@@ -18,4 +19,5 @@ urlpatterns = [
     path('token/refresh/', TaggedTokenRefreshView.as_view()),
     path('verify-otp/', VerifyOTPView.as_view()),
     path('auth/google/', GoogleLoginView.as_view(), name='google-login'),
+    path('verify-token/', VerifyTokenView.as_view(), name='verify-token'),
 ]

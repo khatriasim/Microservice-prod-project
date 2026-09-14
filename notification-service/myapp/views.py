@@ -15,7 +15,7 @@ from google.auth.transport import requests as google_requests
 from django.conf import settings
 from .tokens import CustomRefreshToken
 from drf_spectacular.utils import extend_schema, inline_serializer
-
+from .authentication import CookieJWTAuthentication
 @extend_schema(tags=['Auth'])
 class RegisterView(APIView):
     @extend_schema(
@@ -107,6 +107,18 @@ class LoginView(APIView):
         )
 
         return response
+
+class VerifyTokenView(APIView):
+    authentication_classes = [CookieJWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        return Response({
+            "user_id": user.id,
+            "email": user.email,
+            "name": user.get_full_name() or user.username,
+        })
 
 @extend_schema(tags=['Auth'])
 class ProfileView(APIView):
