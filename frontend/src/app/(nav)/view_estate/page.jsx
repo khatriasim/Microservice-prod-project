@@ -74,6 +74,38 @@ mutation ToggleFav($propertyId: Int!) {
   toggleFavourites(propertyId: $propertyId)
 }`;
 
+const SEARCH_PROPERTIES_QUERY = `
+query SearchProperties(
+  $city: String
+  $bedrooms: Int
+  $bathrooms: Int
+  $propertyType: String
+  $minPrice: Float
+  $maxPrice: Float
+) {
+  properties(
+    city: $city
+    bedrooms: $bedrooms
+    bathrooms: $bathrooms
+    property_type: $propertyType
+    min_price: $minPrice
+    max_price: $maxPrice
+  ) {
+    id
+    title
+    price
+    city
+    status
+    bedrooms
+    bathrooms
+    area
+    address
+    propertyType
+    agentName
+    agentEmail
+  }
+}`;
+
 const LISTING_PHOTOS = [
   "photo-1512917774080-9991f1c4c750",
   "photo-1600596542815-ffad4c1539a9",
@@ -122,6 +154,18 @@ const DEFAULT_STATUS = { bg: "bg-slate-100", text: "text-slate-600", border: "bo
 
 function getStatus(status) {
   return STATUS_STYLES[status?.toLowerCase()] ?? { ...DEFAULT_STATUS, label: status ?? "N/A" };
+}
+
+/* human-readable summary of the active search filters */
+function searchCriteriaLabel(t) {
+  const parts = [];
+  if (t.city) parts.push(`in ${t.city}`);
+  if (t.propertyType) parts.push(t.propertyType);
+  if (t.bedrooms) parts.push(`${t.bedrooms} ${t.bedrooms === "1" ? "bedroom" : "bedrooms"}`);
+  if (t.bathrooms) parts.push(`${t.bathrooms} ${t.bathrooms === "1" ? "bathroom" : "bathrooms"}`);
+  if (t.minPrice) parts.push(`min Rs ${Number(t.minPrice).toLocaleString("en-IN")}`);
+  if (t.maxPrice) parts.push(`max Rs ${Number(t.maxPrice).toLocaleString("en-IN")}`);
+  return parts.join(", ");
 }
 
 /* ---------- property card ---------- */
@@ -225,7 +269,7 @@ function PropertyCard({ property, isFavorite, onToggleFavorite, isLoggedIn }) {
 
         {/* CTA */}
         <Link
-          href={`/view_estate/${property.id}`}
+          href={`/view_property?id=${property.id}`}
           className="mt-2 inline-flex items-center justify-center gap-1.5 rounded-xl bg-dark-green px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-dark-green-hover focus:outline-none focus-visible:ring-4 focus-visible:ring-dark-green/20"
         >
           View Details
@@ -278,7 +322,7 @@ function Header({ user, loading, logout, favCount }) {
           <Link href="/view_estate" className="text-dark-green font-semibold">
             Listings
           </Link>
-          <a href="#" className="text-gray-600 hover:text-dark-green transition-colors">
+          <a href={"/agents"} className="text-gray-600 hover:text-dark-green transition-colors">
             Agents
           </a>
           <a href="#" className="text-gray-600 hover:text-dark-green transition-colors">
@@ -288,7 +332,7 @@ function Header({ user, loading, logout, favCount }) {
 
         <div className="flex items-center gap-3">
           <Link
-            href="/saved"
+          href={"/favourite"}
             aria-label="Saved homes"
             className="relative flex h-10 w-10 rounded-full bg-orange items-center justify-center text-white shadow-md hover:bg-orange-hover transition-colors shrink-0"
           >
@@ -299,6 +343,7 @@ function Header({ user, loading, logout, favCount }) {
               </span>
             )}
           </Link>
+
           <AuthSection user={user} loading={loading} logout={logout} />
         </div>
       </div>
@@ -350,6 +395,18 @@ export default function ViewEstatePage() {
   const [recommendedError, setRecommendedError] = useState(false);
 
   const [favorites, setFavorites] = useState(new Set());
+
+  const [searchCity, setSearchCity] = useState("");
+  const [searchBedrooms, setSearchBedrooms] = useState("");
+  const [searchBathrooms, setSearchBathrooms] = useState("");
+  const [searchPropertyType, setSearchPropertyType] = useState("");
+  const [searchMinPrice, setSearchMinPrice] = useState("");
+  const [searchMaxPrice, setSearchMaxPrice] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState("");
+  const [searchTriggered, setSearchTriggered] = useState(false);
+  const [searchTarget, setSearchTarget] = useState({ city: "", bedrooms: "" });
 
   const [search, setSearch] = useState("");
   const [cityFilter, setCityFilter] = useState("all");
@@ -482,6 +539,45 @@ export default function ViewEstatePage() {
     }
   }
 
+  /* run a GraphQL search with the selected filters when the button is clicked */
+  async function handleSearch(e) {
+    e.preventDefault();
+    const city = searchCity.trim();
+    const bedrooms = searchBedrooms.trim();
+    const bathrooms = searchBathrooms.trim();
+    const propertyType = searchPropertyType.trim();
+    const minPrice = searchMinPrice.trim();
+    const maxPrice = searchMaxPrice.trim();
+
+    setSearchTarget({ city, bedrooms, bathrooms, propertyType, minPrice, maxPrice });
+    setSearchLoading(true);
+    setSearchError("");
+    setSearchTriggered(true);
+    try {
+      const variables = {};
+      if (city) variables.city = city;
+      if (bedrooms) variables.bedrooms = Number(bedrooms);
+      if (bathrooms) variables.bathrooms = Number(bathrooms);
+      if (propertyType) variables.propertyType = propertyType;
+      if (minPrice) variables.minPrice = Number(minPrice);
+      if (maxPrice) variables.maxPrice = Number(maxPrice);
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ query: SEARCH_PROPERTIES_QUERY, variables }),
+      });
+      const json = await res.json();
+      if (json.errors) throw new Error(json.errors[0]?.message || "Search failed");
+      setSearchResults(json?.data?.properties ?? []);
+    } catch {
+      setSearchError("Search failed. Please try again.");
+      setSearchResults([]);
+    } finally {
+      setSearchLoading(false);
+    }
+  }
+
   const favCount = favorites.size;
   const cities = useMemo(() => {
     const set = new Set(
@@ -558,7 +654,7 @@ export default function ViewEstatePage() {
       <main className="flex-1">
         {/* ---- page title ---- */}
         <section className="w-full border-b border-dark-green/10 bg-white/50">
-          <div className="mx-auto max-w-7xl px-5 py-10 lg:px-8 lg:py-14">
+          <div className="mx-auto max-w-7xl px-5 py-6 lg:px-8 lg:py-7">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <h1 className="font-serif-display text-4xl text-dark-green leading-tight">
@@ -578,6 +674,243 @@ export default function ViewEstatePage() {
             </div>
           </div>
         </section>
+
+        {/* ---- search (city + bedrooms) ---- */}
+        <section className="w-full border-b border-slate-100 bg-white/40">
+          <div className="mx-auto max-w-7xl px-5 py-8 lg:px-8 lg:py-10">
+            <header className="mb-5 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-2.5">
+                <span className="grid h-10 w-10 place-items-center rounded-xl bg-dark-green/10 text-dark-green">
+                  <Search size={20} />
+                </span>
+                <div>
+                  <h2 className="font-serif-display text-2xl text-dark-green">
+                    Search Homes
+                  </h2>
+                  <p className="mt-0.5 text-sm text-slate-500">
+                    Find your next home by city and number of bedrooms
+                  </p>
+                </div>
+              </div>
+            </header>
+
+            <form onSubmit={handleSearch} className="flex flex-col gap-4">
+            <div className="flex flex-wrap items-center gap-3">
+              {/* City */}
+              <div className="relative min-w-55 flex-1">
+                <MapPin
+                  size={18}
+                  className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                />
+                <input
+                  type="text"
+                  value={searchCity}
+                  onChange={(e) => setSearchCity(e.target.value)}
+                  placeholder="City, e.g. Kathmandu"
+                  className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm outline-none transition focus:border-dark-green focus:ring-4 focus:ring-dark-green/10"
+                />
+              </div>
+
+              {/* Property type */}
+              <div className="relative min-w-42.5 w-full sm:w-52">
+                <Home
+                  size={18}
+                  className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                />
+                <input
+                  type="text"
+                  value={searchPropertyType}
+                  onChange={(e) => setSearchPropertyType(e.target.value)}
+                  placeholder="Property type, e.g. Apartment"
+                  className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm outline-none transition focus:border-dark-green focus:ring-4 focus:ring-dark-green/10"
+                />
+              </div>
+
+              {/* Bedrooms */}
+              <div className="relative min-w-32.5 w-full sm:w-36">
+                <Bed
+                  size={18}
+                  className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                />
+                <input
+                  type="number"
+                  min="0"
+                  value={searchBedrooms}
+                  onChange={(e) => setSearchBedrooms(e.target.value)}
+                  placeholder="Bedrooms"
+                  className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm outline-none transition focus:border-dark-green focus:ring-4 focus:ring-dark-green/10"
+                />
+              </div>
+
+              {/* Bathrooms */}
+              <div className="relative min-w-32.5 w-full sm:w-36">
+                <Bath
+                  size={18}
+                  className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                />
+                <input
+                  type="number"
+                  min="0"
+                  value={searchBathrooms}
+                  onChange={(e) => setSearchBathrooms(e.target.value)}
+                  placeholder="Bathrooms"
+                  className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm outline-none transition focus:border-dark-green focus:ring-4 focus:ring-dark-green/10"
+                />
+              </div>
+
+              {/* Min price */}
+              <div className="relative min-w-35 w-full sm:w-40">
+                <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-400">
+                  Rs
+                </span>
+                <input
+                  type="number"
+                  min="0"
+                  value={searchMinPrice}
+                  onChange={(e) => setSearchMinPrice(e.target.value)}
+                  placeholder="Min price"
+                  className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-12 pr-4 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm outline-none transition focus:border-dark-green focus:ring-4 focus:ring-dark-green/10"
+                />
+              </div>
+
+              {/* Max price */}
+              <div className="relative min-w-35 w-full sm:w-40">
+                <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-400">
+                  Rs
+                </span>
+                <input
+                  type="number"
+                  min="0"
+                  value={searchMaxPrice}
+                  onChange={(e) => setSearchMaxPrice(e.target.value)}
+                  placeholder="Max price"
+                  className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-12 pr-4 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm outline-none transition focus:border-dark-green focus:ring-4 focus:ring-dark-green/10"
+                />
+              </div>
+            </div>
+
+            {/* Centered search button */}
+            <div className="flex justify-center">
+              <button
+                type="submit"
+                disabled={searchLoading}
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-dark-green px-10 text-sm font-semibold text-white shadow-md shadow-dark-green/20 transition duration-200 hover:bg-dark-green-hover focus:outline-none focus-visible:ring-4 focus-visible:ring-dark-green/20 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <Search size={16} />
+                {searchLoading ? "Searching…" : "Search"}
+              </button>
+            </div>
+            </form>
+
+            {/* Search error */}
+            {searchError && (
+              <p className="mt-4 flex items-center gap-1.5 text-sm text-red-600">
+                <AlertCircle size={15} className="shrink-0" />
+                {searchError}
+              </p>
+            )}
+
+            {/* Search results — shown only after a search has been run */}
+            {searchTriggered && (
+              <div className="mt-8">
+                {searchLoading ? (
+                  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <SkeletonCard key={i} />
+                    ))}
+                  </div>
+                ) : (
+                  <>
+                    {searchResults.length === 0 ? (
+                      <p className="flex items-center gap-2 rounded-xl border border-dashed border-slate-200 bg-white/60 px-4 py-8 text-center text-sm text-slate-500">
+                        <Search size={15} className="shrink-0 text-slate-400" />
+                        No homes found
+                        {searchCriteriaLabel(searchTarget)
+                          ? ` ${searchCriteriaLabel(searchTarget)}`
+                          : ""}
+                        {" — try adjusting your filters."}
+                      </p>
+                    ) : (
+                      <>
+                        <p className="mb-4 text-sm text-slate-500">
+                          {searchResults.length} home
+                          {searchResults.length === 1 ? "" : "s"} found
+                          {searchCriteriaLabel(searchTarget)
+                            ? ` ${searchCriteriaLabel(searchTarget)}`
+                            : ""}
+                        </p>
+                        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                          {searchResults.map((prop) => (
+                            <PropertyCard
+                              key={prop.id}
+                              property={prop}
+                              isFavorite={favorites.has(prop.id)}
+                              onToggleFavorite={toggleFavorite}
+                              isLoggedIn={!!user}
+                            />
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* ---- recommended (logged-in users only) ---- */}
+        {!authLoading && user && (
+          <section className="w-full border-b border-slate-100 bg-white/40">
+            <div className="mx-auto max-w-7xl px-5 py-8 lg:px-8 lg:py-10">
+              <header className="mb-5 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-2.5">
+                  <span className="grid h-10 w-10 place-items-center rounded-xl bg-orange/10 text-orange">
+                    <Sparkles size={20} />
+                  </span>
+                  <div>
+                    <h2 className="font-serif-display text-2xl text-dark-green">
+                      Recommended
+                    </h2>
+                    <p className="mt-0.5 text-sm text-slate-500">
+                      Handpicked for you based on your preferences
+                    </p>
+                  </div>
+                </div>
+              </header>
+
+              {recommendedLoading && (
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <SkeletonCard key={i} />
+                  ))}
+                </div>
+              )}
+
+              {!recommendedLoading && !recommendedError && recommended.length > 0 && (
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {recommended.map((prop) => (
+                    <PropertyCard
+                      key={prop.id}
+                      property={prop}
+                      isFavorite={favorites.has(prop.id)}
+                      onToggleFavorite={toggleFavorite}
+                      isLoggedIn={!!user}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {!recommendedLoading && recommended.length === 0 && (
+                <p className="rounded-xl border border-dashed border-slate-200 bg-white/60 px-4 py-6 text-center text-sm text-slate-500">
+                  {recommendedError
+                    ? "We couldn&apos;t load your recommendations right now."
+                    : "No recommendations yet — keep browsing and we&apos;ll tailor these for you."}
+                </p>
+              )}
+            </div>
+          </section>
+        )}
 
         {/* ---- search / filter bar ---- */}
         <section className="sticky top-16 z-30 w-full border-b border-slate-100 bg-background/80 backdrop-blur-md">
@@ -637,59 +970,6 @@ export default function ViewEstatePage() {
             />
           </div>
         </section>
-
-        {/* ---- recommended (logged-in users only) ---- */}
-        {!authLoading && user && (
-          <section className="w-full border-b border-slate-100 bg-white/40">
-            <div className="mx-auto max-w-7xl px-5 py-8 lg:px-8 lg:py-10">
-              <header className="mb-5 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-2.5">
-                  <span className="grid h-10 w-10 place-items-center rounded-xl bg-orange/10 text-orange">
-                    <Sparkles size={20} />
-                  </span>
-                  <div>
-                    <h2 className="font-serif-display text-2xl text-dark-green">
-                      Recommended
-                    </h2>
-                    <p className="mt-0.5 text-sm text-slate-500">
-                      Handpicked for you based on your preferences
-                    </p>
-                  </div>
-                </div>
-              </header>
-
-              {recommendedLoading && (
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {Array.from({ length: 3 }).map((_, i) => (
-                    <SkeletonCard key={i} />
-                  ))}
-                </div>
-              )}
-
-              {!recommendedLoading && !recommendedError && recommended.length > 0 && (
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {recommended.map((prop) => (
-                    <PropertyCard
-                      key={prop.id}
-                      property={prop}
-                      isFavorite={favorites.has(prop.id)}
-                      onToggleFavorite={toggleFavorite}
-                      isLoggedIn={!!user}
-                    />
-                  ))}
-                </div>
-              )}
-
-              {!recommendedLoading && recommended.length === 0 && (
-                <p className="rounded-xl border border-dashed border-slate-200 bg-white/60 px-4 py-6 text-center text-sm text-slate-500">
-                  {recommendedError
-                    ? "We couldn&apos;t load your recommendations right now."
-                    : "No recommendations yet — keep browsing and we&apos;ll tailor these for you."}
-                </p>
-              )}
-            </div>
-          </section>
-        )}
 
         {/* ---- results ---- */}
         <section className="mx-auto max-w-7xl px-5 py-8 lg:px-8 lg:py-10">

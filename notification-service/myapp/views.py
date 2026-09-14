@@ -360,3 +360,11 @@ class GoogleLoginView(APIView):
             return Response({"error":"invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
 
         
+class Agent(APIView):
+
+    def get(self, request):
+        profiles = UserProfiles.objects.filter(is_agent=True).select_related("user")
+        return Response([
+            {"name": profile.user.username, "email": profile.user.email}
+            for profile in profiles
+        ])

@@ -1,9 +1,19 @@
 "use client";
-import  { AuthSection} from "@/components/AuthSection"
+import { useEffect, useState } from "react";
+import { AuthSection } from "@/components/AuthSection"
 import Link from "next/link";
 import {
+  User,
+  Lock,
+  Eye,
+  EyeOff,
+  Loader2,
+  AlertCircle,
+  CheckCircle2,
   ArrowRight,
   Home,
+  ShieldCheck,
+  KeyRound,
 } from "lucide-react";
 import  { useAuth } from "@/hooks/useAuth"
 
@@ -17,6 +27,14 @@ import {
   Search,
   Star,
 } from "lucide-react";
+
+const GRAPHQL_URL = "http://localhost/graphql";
+const MY_FAVORITES_QUERY = `
+query {
+  myFavorites {
+    id
+  }
+}`;
 
 const IMAGES = {
   listing:
@@ -82,7 +100,7 @@ function AvatarStack({ size = "w-6 h-6", plus = true }) {
   );
 }
 
-function Header({ user, loading, logout }) {
+function Header({ user, loading, logout, favCount = 0 }) {
   return (
     <header className="relative z-30 shrink-0 w-full px-6 lg:px-12 py-4 flex items-center justify-between animate-fade-in delay-200">
       <Logo />
@@ -95,7 +113,7 @@ function Header({ user, loading, logout }) {
         <Link href={"/view_estate"} className="text-gray-600 hover:text-dark-green transition-colors">
           Listings
         </Link>
-        <Link href={"/view_agents"} className="text-gray-600 hover:text-dark-green transition-colors">
+        <Link href={"/agents"} className="text-gray-600 hover:text-dark-green transition-colors">
           Agents
         </Link>
         <a href="#" className="text-gray-600 hover:text-dark-green transition-colors">
@@ -114,14 +132,16 @@ function Header({ user, loading, logout }) {
         </button>
 
         <a
-          href="#"
+          href={"/favourite"}
           aria-label="Saved homes"
           className="relative flex h-10 w-10 rounded-full bg-orange items-center justify-center text-white shadow-md hover:bg-orange-hover transition-colors shrink-0"
         >
-          <Heart className="w-5 h-5 fill-current" strokeWidth={2} />
-          <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-orange border-2 border-background text-[10px] font-bold text-white flex items-center justify-center">
-            4
-          </span>
+          <Heart className="w-5 h-5" strokeWidth={2} />
+          {favCount > 0 && (
+            <span className="absolute -top-1 -right-1 min-h-5 min-w-5 rounded-full bg-dark-green border-2 border-background text-[10px] font-bold text-white flex items-center justify-center px-1">
+              {favCount}
+            </span>
+          )}
         </a>
 
         <a
@@ -228,7 +248,7 @@ function DesktopHero() {
             Find the Perfect Property for Your Family
           </h2>
           <a
-            href="#"
+            href={"/view_estate"}
             className="inline-flex items-center gap-2 mt-3 px-6 py-3 bg-orange hover:bg-orange-hover rounded-full text-white text-sm font-semibold transition-colors shadow-lg shadow-orange/20"
           >
             Explore Listings <ArrowRight className="w-4 h-4" />
@@ -466,10 +486,42 @@ function MobileHero() {
 
 export default function EstateHero() {
   const { user, loading, logout } = useAuth();
+  const [favCount, setFavCount] = useState(0);
+
+  /* fetch saved-home count for the header heart badge */
+  useEffect(() => {
+    if (loading) return; // wait for the auth check to settle
+
+    let cancelled = false;
+    async function fetchFavorites() {
+      /* not logged in → no saved homes to count */
+      if (!user) {
+        setFavCount(0);
+        return;
+      }
+      try {
+        const res = await fetch(GRAPHQL_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ query: MY_FAVORITES_QUERY }),
+        });
+        const json = await res.json();
+        if (!cancelled) setFavCount(json?.data?.myFavorites?.length ?? 0);
+      } catch {
+        if (!cancelled) setFavCount(0);
+      }
+    }
+
+    fetchFavorites();
+    return () => {
+      cancelled = true;
+    };
+  }, [user, loading]);
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-background">
-      <Header user={user} loading={loading} logout={logout} />
+      <Header user={user} loading={loading} logout={logout} favCount={favCount} />
       <main className="relative flex-1 flex flex-col overflow-hidden">
         <DesktopHero />
         <TabletHero />

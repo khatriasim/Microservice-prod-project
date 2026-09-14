@@ -44,3 +44,8 @@ class UpdatePropertyInput:
     bathrooms: Optional[int] = None
     area: Optional[float] = None
     address: Optional[str] = None
+
+# @strawberry.type
+# class Agents:
+#     name: Optional[str] = None
+#     email: Optional[str] = None

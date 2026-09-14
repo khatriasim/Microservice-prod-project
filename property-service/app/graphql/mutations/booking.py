@@ -22,6 +22,22 @@ class BookingMutation:
             if not prop:
                 raise ValueError("Property not found")
 
+            # don't double-book — return the user's existing booking for this property
+            existing = db.query(Booking).filter(
+                Booking.property_id == input.property_id,
+                Booking.buyer_id == int(user_id),
+            ).first()
+            if existing:
+                return BookingType(
+                    id=existing.id,
+                    property_id=existing.property_id,
+                    buyer_id=existing.buyer_id,
+                    booking_date=str(existing.booking_date),
+                    status=existing.status,
+                    property_title=existing.property.title if existing.property else None,
+                    buyer_name=None,
+                )
+
             new_booking = Booking(
                 property_id=input.property_id,
                 buyer_id=int(user_id),
@@ -42,6 +58,26 @@ class BookingMutation:
                 property_title=new_booking.property.title,
                 buyer_name=None,  # no local user table anymore — see note below
             )
+        finally:
+            db.close()
+
+    @strawberry.mutation
+    def cancel_booking(self, info: Info, id: int) -> bool:
+        user_id = info.context["user_id"]
+        if not user_id:
+            raise Exception("Not authenticated")
+
+        db = SessionLocal()
+        try:
+            booking = db.query(Booking).filter(Booking.id == id).first()
+            if not booking:
+                raise Exception("Booking not found")
+            if booking.buyer_id != int(user_id):
+                raise Exception("Not your booking")
+
+            db.delete(booking)
+            db.commit()
+            return True
         finally:
             db.close()
 

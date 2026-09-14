@@ -47,7 +47,7 @@ export function AuthSection({ user, loading, logout }) {
         onClick={() => setOpen((v) => !v)}
         aria-label="Account menu"
         aria-expanded={open}
-        className="h-10 w-10 rounded-full overflow-hidden ring-2 ring-transparent hover:ring-orange/30 transition-all"
+        className="h-10 w-10 rounded-full overflow-hidden ring-2 ring-transparent hover:ring-orange/30 transition-all cursor-pointer"
       >
         {user.picture ? (
           <Image
@@ -82,7 +82,7 @@ export function AuthSection({ user, loading, logout }) {
               setOpen(false);
               logout();
             }}
-            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
           >
             Logout
           </button>
