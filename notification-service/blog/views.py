@@ -292,6 +292,7 @@ class AddCommentView(APIView):
         serializer = CommentSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(post=post, author=request.user)
+            invalidate_post_cache()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -333,9 +334,11 @@ class TogglePostLikeView(APIView):
             #     notification_type ='like',
             #     post=post
             # )
+                invalidate_post_cache()
                 return Response({'message':"post liked"}, status=status.HTTP_201_CREATED)
             else:
                 like.delete()
+                invalidate_post_cache()
                 return Response({'message':"like removed"}, status=status.HTTP_200_OK)
 
 

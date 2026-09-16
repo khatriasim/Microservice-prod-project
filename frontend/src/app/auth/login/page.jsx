@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -21,6 +21,31 @@ import {
 // Backend — Django notification service. Override with NEXT_PUBLIC_API_URL if needed.
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost";
 const LOGIN_URL = `${API_BASE}/api/login/`;
+const Google_LOGIN_URL = `${API_BASE}/api/auth/google/`
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
+const GOOGLE_SCRIPT_SRC = "https://accounts.google.com/gsi/client"
+
+// Load the Google Identity Services script once; resolve once window.google.accounts.id is ready.
+function loadGoogleIdentityScript() {
+  return new Promise((resolve, reject) => {
+    if (typeof window === "undefined") return reject(new Error("no window"));
+    if (window.google?.accounts?.id) return resolve();
+
+    const existing = document.querySelector(`script[src="${GOOGLE_SCRIPT_SRC}"]`);
+    if (existing) {
+      existing.addEventListener("load", resolve);
+      existing.addEventListener("error", () => reject(new Error("script load failed")));
+      return;
+    }
+
+    const s = document.createElement("script");
+    s.src = GOOGLE_SCRIPT_SRC;
+    s.async = true;
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error("script load failed"));
+    document.head.appendChild(s);
+  });
+}
 
 export default function LoginPage() {
   const router = useRouter();
@@ -31,6 +56,12 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  // Google sign-in
+  const [googleReady, setGoogleReady] = useState(false);
+  const [googleError, setGoogleError] = useState("");
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const googleBtnRef = useRef(null);
 
   const canSubmit =
     username.trim().length > 0 && password.length > 0 && !loading;
@@ -77,6 +108,75 @@ export default function LoginPage() {
       setLoading(false);
     }
   }
+
+  // Exchange the Google ID token for backend auth cookies.
+  const handleGoogleCredential = useCallback(
+    async (token) => {
+      if (!token || googleLoading) return;
+      setGoogleLoading(true);
+      setError("");
+      setSuccess("");
+      try {
+        const res = await fetch(Google_LOGIN_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include", // same cookie flow as username/password login
+          body: JSON.stringify({ token }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok) {
+          setSuccess(data.message || "Login successful");
+          setTimeout(() => router.push("/"), 600);
+          return;
+        }
+        setError(data.error || data.message || "Google sign-in failed. Please try again.");
+      } catch {
+        setError("Unable to reach the server. Please check your connection and try again.");
+      } finally {
+        setGoogleLoading(false);
+      }
+    },
+    [googleLoading, router]
+  );
+
+  // Load GIS and register the credential callback.
+  useEffect(() => {
+    if (!GOOGLE_CLIENT_ID) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        await loadGoogleIdentityScript();
+        if (cancelled) return;
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: (resp) => handleGoogleCredential(resp?.credential),
+        });
+        setGoogleReady(true);
+      } catch {
+        if (!cancelled) setGoogleError("Google sign-in couldn't load. Please try again.");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [handleGoogleCredential]);
+
+  // Render the G-branded button once the container is mounted.
+  useEffect(() => {
+    if (!googleReady || !googleBtnRef.current) return;
+    const container = googleBtnRef.current;
+    container.innerHTML = ""; // idempotent across StrictMode double-effects
+    window.google.accounts.id.renderButton(container, {
+      type: "standard",
+      theme: "outline",
+      size: "large",
+      text: "continue_with",
+      shape: "pill",
+      logo_alignment: "left",
+      width: 240,
+      lang: "en",
+    });
+  }, [googleReady]);
 
   return (
     <main className="h-full w-full overflow-y-auto bg-background">
@@ -152,7 +252,7 @@ export default function LoginPage() {
                 Sign in
               </h2>
               <p className="mt-2 text-sm text-slate-600">
-                Enter your credentials to access your account.
+                Enter your credentials or continue with Google.
               </p>
             </header>
 
@@ -269,6 +369,34 @@ export default function LoginPage() {
                 )}
               </button>
             </form>
+
+            {/* Google sign-in */}
+            {GOOGLE_CLIENT_ID && (
+              <div className="mt-7">
+                <div className="mb-5 flex items-center gap-3">
+                  <span className="h-px flex-1 bg-slate-200" />
+                  <span className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                    or continue with
+                  </span>
+                  <span className="h-px flex-1 bg-slate-200" />
+                </div>
+
+                {googleLoading ? (
+                  <div className="flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 text-sm text-slate-500">
+                    <Loader2 size={18} className="animate-spin" />
+                    Signing in with Google…
+                  </div>
+                ) : googleReady ? (
+                  <div ref={googleBtnRef} className="google-btn flex justify-center" />
+                ) : googleError ? (
+                  <p className="text-center text-xs text-red-600">{googleError}</p>
+                ) : (
+                  <div className="flex h-12 w-full items-center justify-center rounded-xl border border-slate-200 text-sm text-slate-400">
+                    Loading Google sign-in…
+                  </div>
+                )}
+              </div>
+            )}
 
             <p className="mt-8 text-center text-sm text-slate-600">
               Don&apos;t have an account?{" "}

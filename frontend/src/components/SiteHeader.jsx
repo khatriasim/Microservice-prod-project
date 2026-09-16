@@ -36,9 +36,9 @@ export function SiteHeader({ user, loading, logout, favCount = 0, active = "home
           <Link href="/agents" className={linkClass("agents")}>
             Agents
           </Link>
-          <a href="#" className="text-gray-600 hover:text-dark-green transition-colors">
+          <Link href="/blog" className={linkClass("blog")}>
             Blog
-          </a>
+          </Link>
         </nav>
 
         <div className="flex items-center gap-3">

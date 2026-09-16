@@ -1,4 +1,5 @@
 import strawberry
+import math
 from strawberry.types import Info
 from typing import List, Optional
 from app.graphql.types.property import PropertyType
@@ -7,69 +8,67 @@ from app.models.property import Property
 from app.models.user import User
 from app.models.search_log import SearchLog
 from app.core.recommendation import build_user_profile, score_property
+
+
+# def _closeness(actual, target, tolerance=1.0):
+#     if actual is None or target is None or target == 0:
+#         return 0.0
+#     ratio = abs(actual - target) / target
+#     return max(0.0, 1.0 - ratio / tolerance)
+
+
+# def _price_closeness(price, min_price, max_price):
+#     if price is None:
+#         return 0.0
+
+#     # Both bounds given
+#     if min_price is not None and max_price is not None:
+#         if min_price <= price <= max_price:
+#             return 1.0
+#         midpoint = (min_price + max_price) / 2
+#         return _closeness(price, midpoint, tolerance=2.0)
+
+#     # Only a minimum
+#     if min_price is not None:
+#         if price >= min_price:
+#             return 1.0
+#         return _closeness(price, min_price, tolerance=2.0)
+
+#     # Only a maximum
+#     if max_price is not None:
+#         if price <= max_price:
+#             return 1.0
+#         return _closeness(price, max_price, tolerance=2.0)
+
+#     return 0.0
+
+
+# def _score_property(p, city, min_price, max_price, bedrooms, bathrooms, property_type):
+#     score = 0.0
+
+#     # Categorical: exact match (case-insensitive, trimmed — remember the
+#     # "lalitpur" vs "Lalitpur" bug from the recommendation algorithm)
+#     if city:
+#         if p.city and p.city.strip().lower() == city.strip().lower():
+#             score += 3.0
+
+#     if property_type:
+#         if p.property_type and p.property_type.strip().lower() == property_type.strip().lower():
+#             score += 1.5
+
+#     # Numeric: graded by closeness
+#     if min_price is not None or max_price is not None:
+#         score += 2.5 * _price_closeness(p.price, min_price, max_price)
+
+#     if bedrooms is not None:
+#         score += 1.5 * _closeness(p.bedrooms, bedrooms, tolerance=1.0)
+
+#     if bathrooms is not None:
+#         score += 1.0 * _closeness(p.bathrooms, bathrooms, tolerance=1.0)
+
+#     return score
 @strawberry.type
 class PropertyQuery:
-
-    # @strawberry.field
-    # def properties(self, info:Info,
-    #                city: Optional[str] = None,
-    #                min_price: Optional[float] = None,
-    #                max_price: Optional[float] = None,
-    #                bedrooms: Optional[int] = None,
-    #                property_type: Optional[str] = None,
-    #                bathrooms: Optional[int] = None,
-    #                ) -> List[PropertyType]:
-    #     db = SessionLocal()
-    #     try:
-    #         query = db.query(Property)
-
-    #         if city:
-    #             query = query.filter(Property.city == city)
-    #         if min_price:
-    #             query = query.filter(Property.price >= min_price)
-    #         if max_price:
-    #             query = query.filter(Property.price <= max_price)
-    #         if bedrooms:
-    #             query = query.filter(Property.bedrooms == bedrooms)
-    #         if bathrooms:
-    #             query = query.filter(Property.bathrooms == bathrooms)
-    #         if property_type:
-    #             query = query.filter(Property.property_type == property_type)
-    #         # agent_name filter removed — no local User table to join against.
-    #         # Reintroduce once user_profiles cache table exists (join on that instead).
-    #         user_id = info.context.get("user_id")
-    #         if user_id and (city or min_price or max_price or bedrooms or property_type):
-    #             log = SearchLog(
-    #                 user_id=int(user_id),
-    #                 city = city,
-    #                 min_price=min_price,
-    #                 max_price=max_price,
-    #                 bedrooms=bedrooms,
-    #                 property_type=property_type,
-    #             )
-    #             db.add(log)
-    #             db.commit()
-
-    #         props = query.all()
-    #         return [
-    #             PropertyType(
-    #                 id=p.id,
-    #                 title=p.title,
-    #                 price=p.price,
-    #                 city=p.city,
-    #                 status=p.status,
-    #                 agent_id=p.agent_user_id,
-    #                 agent_name=p.agent_name,
-    #                 description=p.description,
-    #                 bedrooms=p.bedrooms,
-    #                 bathrooms=p.bathrooms,
-    #                 area=p.area,
-    #                 address=p.address,
-    #             )
-    #             for p in props
-    #         ]
-    #     finally:
-    #         db.close()
 
     @strawberry.field
     def properties(self, info: Info,
@@ -79,49 +78,16 @@ class PropertyQuery:
                    bedrooms: Optional[int] = None,
                    property_type: Optional[str] = None,
                    bathrooms: Optional[int] = None,
+                   limit: int = 30,
                    ) -> List[PropertyType]:
         db = SessionLocal()
         try:
-            # Step 1: only the city filter is applied at the DB level.
-            # This is the "anchor" — everything else is scored, not filtered.
-            query = db.query(Property)
-            if city:
-                query = query.filter(Property.city.ilike(city))
+            has_criteria = any([
+                city, min_price, max_price, bedrooms, bathrooms, property_type
+            ])
 
-            all_candidates = query.all()
-
-            # Step 2: score each candidate by how many optional
-            # criteria it actually satisfies.
-            def match_score(p):
-                score = 0
-                if min_price is not None and p.price >= min_price:
-                    score += 1
-                if max_price is not None and p.price <= max_price:
-                    score += 1
-                if bedrooms is not None and p.bedrooms == bedrooms:
-                    score += 1
-                if bathrooms is not None and p.bathrooms == bathrooms:
-                    score += 1
-                if property_type is not None and p.property_type == property_type:
-                    score += 1
-                return score
-
-            # How many optional filters were actually provided —
-            # used only for logging/search history, not for cutting results.
-            filters_requested = sum(
-                f is not None for f in [min_price, max_price, bedrooms, bathrooms, property_type]
-            )
-
-            # Step 3: sort best matches first. Ties broken by newest listing (highest id).
-            scored = sorted(
-                all_candidates,
-                key=lambda p: (match_score(p), p.id),
-                reverse=True
-            )
-
-            # Step 4: log the search (unchanged from before)
             user_id = info.context.get("user_id")
-            if user_id and (city or min_price or max_price or bedrooms or property_type):
+            if user_id and has_criteria:
                 log = SearchLog(
                     user_id=int(user_id),
                     city=city,
@@ -133,55 +99,75 @@ class PropertyQuery:
                 db.add(log)
                 db.commit()
 
-            return [
-                PropertyType(
-                    id=p.id,
-                    title=p.title,
-                    price=p.price,
-                    city=p.city,
-                    status=p.status,
-                    agent_id=p.agent_user_id,
-                    agent_name=p.agent_name,
-                    description=p.description,
-                    bedrooms=p.bedrooms,
-                    bathrooms=p.bathrooms,
-                    area=p.area,
-                    address=p.address,
-                )
-                for p in scored
+            base_query = db.query(Property).filter(Property.status == "available")
+
+            # --- No search criteria at all: just return everything ---
+            if not has_criteria:
+                props = base_query.order_by(Property.id.desc()).limit(limit).all()
+                return _to_property_types(props)
+
+            # --- Step 1: try an EXACT match on everything the user specified ---
+            exact_query = base_query
+            if city:
+                exact_query = exact_query.filter(Property.city.ilike(city.strip()))
+            if bedrooms is not None:
+                exact_query = exact_query.filter(Property.bedrooms == bedrooms)
+            if bathrooms is not None:
+                exact_query = exact_query.filter(Property.bathrooms == bathrooms)
+            if property_type:
+                exact_query = exact_query.filter(Property.property_type.ilike(property_type.strip()))
+            if min_price is not None:
+                exact_query = exact_query.filter(Property.price >= min_price)
+            if max_price is not None:
+                exact_query = exact_query.filter(Property.price <= max_price)
+
+            exact_matches = exact_query.limit(limit).all()
+            if exact_matches:
+                return _to_property_types(exact_matches)
+
+            # --- Step 2: no exact match — fall back to CITY as top priority ---
+            # City is the ONLY hard filter here. Bedrooms/bathrooms/type are
+            # intentionally dropped so a city never returns empty just because
+            # no listing matches every secondary filter exactly.
+            if city:
+                city_matches = base_query.filter(Property.city.ilike(city.strip())).all()
+            else:
+                city_matches = base_query.all()
+
+            if not city_matches:
+                # The city itself has zero listings — nothing sensible to show.
+                return []
+
+            # --- Step 3: if no price range given, just return the city matches ---
+            if min_price is None and max_price is None:
+                return _to_property_types(city_matches[:limit])
+
+            # --- Step 4: split into below-range and above-range, take closest 3 of each ---
+            below = [
+                p for p in city_matches
+                if p.price is not None and min_price is not None and p.price < min_price
             ]
+            above = [
+                p for p in city_matches
+                if p.price is not None and max_price is not None and p.price > max_price
+            ]
+            in_range = [
+                p for p in city_matches
+                if p.price is not None
+                and (min_price is None or p.price >= min_price)
+                and (max_price is None or p.price <= max_price)
+            ]
+
+            # closest below min_price: sort descending by price (biggest = closest to min)
+            below_sorted = sorted(below, key=lambda p: p.price, reverse=True)[:3]
+            # closest above max_price: sort ascending by price (smallest = closest to max)
+            above_sorted = sorted(above, key=lambda p: p.price)[:3]
+
+            result = in_range + below_sorted + above_sorted
+            return _to_property_types(result[:limit])
+
         finally:
             db.close()
-
-    @strawberry.field
-    def my_properties(self, info: Info) -> List[PropertyType]:
-        user_id = info.context["user_id"]
-        if not user_id:
-            raise Exception("Not authenticated")
-
-        db = SessionLocal()
-        try:
-            props = db.query(Property).filter(Property.agent_user_id == int(user_id)).all()
-            return [
-                PropertyType(
-                    id=p.id,
-                    title=p.title,
-                    price=p.price,
-                    city=p.city,
-                    status=p.status,
-                    agent_id=p.agent_user_id,
-                    agent_name=p.agent_name,
-                    description=p.description,
-                    bedrooms=p.bedrooms,
-                    bathrooms=p.bathrooms,
-                    area=p.area,
-                    address=p.address,
-                )
-                for p in props
-            ]
-        finally:
-            db.close()
-
 
     @strawberry.field
     def recommended_properties(self, info: Info, limit: int = 10) -> List[PropertyType]:
@@ -268,3 +254,25 @@ class PropertyQuery:
     #         ]
     #     finally:
     #         db.close()
+
+
+def _to_property_types(props):
+        return [
+            PropertyType(
+                id=p.id,
+                title=p.title,
+                price=p.price,
+                city=p.city,
+                status=p.status,
+                agent_id=p.agent_user_id,
+                agent_name=p.agent_name,
+                agent_email=p.agent_email,
+                description=p.description,
+                bedrooms=p.bedrooms,
+                bathrooms=p.bathrooms,
+                area=p.area,
+                address=p.address,
+                property_type=p.property_type,
+            )
+            for p in props
+        ]

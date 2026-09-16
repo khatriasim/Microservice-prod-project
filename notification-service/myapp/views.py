@@ -332,8 +332,7 @@ class GoogleLoginView(APIView):
         responses=inline_serializer(
             name='GoogleLoginResponse',
             fields={
-                'access': serializers.CharField(),
-                'refresh': serializers.CharField(),
+                'message': serializers.CharField(),
                 'created': serializers.BooleanField(),
             },
         ),
@@ -346,19 +345,44 @@ class GoogleLoginView(APIView):
                 google_requests.Request(),
                 settings.GOOGLE_CLIENT_ID
             )
+        except Exception:
+            return Response({'error': 'invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
 
-            email = google_user['email']
-            name = google_user['name']
-            user, created = User.objects.get_or_create(email=email)
-            refresh = CustomRefreshToken.for_user(user)
-            return Response({
-                'access' : str(refresh.access_token),
-                'refresh': str(refresh),
-                'created': created
-            }, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({"error":"invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+        email = google_user['email']
+        name = google_user.get('name', '')
+        picture = google_user.get('picture')
 
+        user, created = User.objects.get_or_create(
+            email=email,
+            defaults={'username': email, 'first_name': name},
+        )
+
+        refresh = CustomRefreshToken.for_user(user)
+        access = str(refresh.access_token)
+        refresh_token = str(refresh)
+
+        response = Response(
+            {'message': 'Login successful', 'created': created},
+            status=status.HTTP_200_OK
+        )
+        response.set_cookie(
+            key='access_token',
+            value=access,
+            httponly=True,
+            secure=not settings.DEBUG,
+            samesite='Strict',
+            max_age=60 * 60 * 24 * 3,
+        )
+        response.set_cookie(
+            key='refresh_token',
+            value=refresh_token,
+            httponly=True,
+            secure=not settings.DEBUG,
+            samesite='Strict',
+            max_age=60 * 60 * 24 * 60,
+        )
+
+        return response
         
 class Agent(APIView):
 

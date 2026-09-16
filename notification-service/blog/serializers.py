@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Post, Comment, Category, Notification
+from .models import Post, Comment, Category, Notification, Like
 from django.contrib.auth.models import User
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -11,6 +11,8 @@ class CategorySerializer(serializers.ModelSerializer):
 class PostSerializer(serializers.ModelSerializer):
     author = serializers.SerializerMethodField()
     categories = CategorySerializer(many=True, read_only=True)
+    likes_count = serializers.SerializerMethodField()
+    comments_count = serializers.SerializerMethodField()
     category_ids = serializers.PrimaryKeyRelatedField(
         many = True,
         queryset = Category.objects.all(),
@@ -20,6 +22,12 @@ class PostSerializer(serializers.ModelSerializer):
 
     def get_author(self, obj):
         return obj.author.username
+
+    def get_likes_count(self, obj):
+        return Like.objects.filter(post=obj).count()
+
+    def get_comments_count(self, obj):
+        return Comment.objects.filter(post=obj).count()
     
     def create(self, validated_data):
         categories = validated_data.pop('categories', [])
@@ -37,7 +45,7 @@ class PostSerializer(serializers.ModelSerializer):
         return instance
     class Meta:
         model = Post
-        fields = ['id', 'title', 'content', 'author', 'status','views', 'created_at', 'categories', 'category_ids', 'updated_at']
+        fields = ['id', 'title', 'content', 'author', 'status','views', 'created_at', 'categories', 'category_ids', 'updated_at', 'likes_count', 'comments_count']
         read_only_fields = ['id', 'author', 'created_at', 'updated_at']
 
 

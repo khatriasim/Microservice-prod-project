@@ -116,20 +116,20 @@ function Header({ user, loading, logout, favCount = 0 }) {
         <Link href={"/agents"} className="text-gray-600 hover:text-dark-green transition-colors">
           Agents
         </Link>
-        <a href="#" className="text-gray-600 hover:text-dark-green transition-colors">
+        <Link href="/blog" className="text-gray-600 hover:text-dark-green transition-colors">
           Blog
-        </a>
+        </Link>
       </nav>
 
       {/* Right actions */}
       <div className="flex items-center gap-2 lg:gap-3">
-        <button
+        {/* <button
           type="button"
           aria-label="Search"
           className="hidden sm:flex h-10 w-10 rounded-full border border-dark-green/20 items-center justify-center text-dark-green hover:bg-dark-green hover:text-white transition-colors"
         >
           <Search className="w-5 h-5" strokeWidth={2} />
-        </button>
+        </button> */}
 
         <a
           href={"/favourite"}
@@ -144,16 +144,6 @@ function Header({ user, loading, logout, favCount = 0 }) {
           )}
         </a>
 
-        <a
-          href="#"
-          aria-label="Inquiries"
-          className="relative flex h-10 w-10 rounded-full border border-dark-green/20 items-center justify-center text-dark-green hover:bg-dark-green hover:text-white transition-colors shrink-0"
-        >
-          <MessageCircle className="w-5 h-5" strokeWidth={2} />
-          <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-orange text-[10px] font-bold text-white flex items-center justify-center border-2 border-background">
-            1
-          </span>
-        </a>
 
         <AuthSection user={user} loading={loading} logout={logout} />
       </div>
@@ -228,7 +218,7 @@ function DesktopHero() {
       </a>
 
       {/* Info badges above images — text row */}
-      <div className="absolute bottom-[calc(min(40vh,33vw)+12px)] left-12 right-12 z-10 flex items-end gap-0">
+      <div className="absolute bottom-[calc(min(30vh,25vw)+12px)] left-12 right-12 z-10 flex items-end gap-0">
         {/* Left badge — Homes Sold */}
         <div className="flex-1 text-dark-green animate-scale-in delay-1000">
           <div className="flex items-center gap-2 mb-1">
@@ -273,7 +263,7 @@ function DesktopHero() {
       <div className="absolute bottom-0 left-0 right-0 z-0 flex items-end gap-0">
         {/* Left */}
         <div className="flex-1 relative animate-photo-reveal delay-700">
-          <div className="relative min-h-[min(34vh,28vw)] max-h-[min(34vh,28vw)]">
+          <div className="relative min-h-[min(24vh,20vw)] max-h-[min(24vh,20vw)]">
             <Image
               src={IMAGES.bottomLeft}
               alt="Exterior curb appeal"
@@ -285,7 +275,7 @@ function DesktopHero() {
 
         {/* Center */}
         <div className="flex-[1.265] relative animate-photo-reveal delay-600">
-          <div className="relative min-h-[min(40vh,33vw)] max-h-[min(40vh,33vw)]">
+          <div className="relative min-h-[min(30vh,25vw)] max-h-[min(30vh,25vw)]">
             <Image
               src={IMAGES.bottomCenter}
               alt="Dream home exterior"
@@ -297,7 +287,7 @@ function DesktopHero() {
 
         {/* Right */}
         <div className="flex-1 relative animate-photo-reveal delay-800">
-          <div className="relative min-h-[min(34vh,28vw)] max-h-[min(34vh,28vw)]">
+          <div className="relative min-h-[min(24vh,20vw)] max-h-[min(24vh,20vw)]">
             <Image
               src={IMAGES.bottomRight}
               alt="Interior lifestyle"
@@ -374,17 +364,17 @@ function TabletHero() {
       {/* Bottom 3 images */}
       <div className="absolute bottom-0 left-0 right-0 z-0 flex items-end gap-0">
         <div className="flex-1 relative animate-photo-reveal delay-700">
-          <div className="relative min-h-[30vh] max-h-[30vh]">
+          <div className="relative min-h-[22vh] max-h-[22vh]">
             <Image src={IMAGES.bottomLeft} alt="Exterior curb appeal" fill className="object-cover" />
           </div>
         </div>
         <div className="flex-[1.265] relative animate-photo-reveal delay-600">
-          <div className="relative min-h-[36vh] max-h-[36vh]">
+          <div className="relative min-h-[28vh] max-h-[28vh]">
             <Image src={IMAGES.bottomCenter} alt="Dream home exterior" fill className="object-cover" />
           </div>
         </div>
         <div className="flex-1 relative animate-photo-reveal delay-800">
-          <div className="relative min-h-[30vh] max-h-[30vh]">
+          <div className="relative min-h-[22vh] max-h-[22vh]">
             <Image src={IMAGES.bottomRight} alt="Interior lifestyle" fill className="object-cover" />
           </div>
         </div>

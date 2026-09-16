@@ -202,3 +202,9 @@ body {
 .delay-1200 {
   animation-delay: 1.2s;
 }
+
+/* === GOOGLE SIGN-IN === */
+/* Override the default background Google adds inside its iframe. */
+.google-btn > div {
+  background: transparent !important;
+}

@@ -87,9 +87,9 @@ query SearchProperties(
     city: $city
     bedrooms: $bedrooms
     bathrooms: $bathrooms
-    property_type: $propertyType
-    min_price: $minPrice
-    max_price: $maxPrice
+    propertyType: $propertyType
+    minPrice: $minPrice
+    maxPrice: $maxPrice
   ) {
     id
     title
@@ -186,19 +186,6 @@ function PropertyCard({ property, isFavorite, onToggleFavorite, isLoggedIn }) {
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
         />
-        {/* Favorite toggle */}
-        <button
-          type="button"
-          onClick={() => isLoggedIn && onToggleFavorite?.(property.id)}
-          aria-label={isFavorite ? "Remove from saved" : "Save property"}
-          className={`absolute top-3 cursor-pointer right-5 z-10 grid h-9 w-9 place-items-center rounded-full shadow-md transition-all duration-200
-            ${isFavorite
-              ? "bg-orange text-white shadow-orange/30 hover:bg-orange-hover"
-              : "bg-white/90 backdrop-blur-sm text-slate-500 hover:bg-white hover:text-orange border border-white/20"
-            }`}
-        >
-          <Heart size={16} className={isFavorite ? "fill-current" : ""} strokeWidth={2} />
-        </button>
         {/* Status badge */}
         <span
           className={`absolute top-3 left-3 inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide border ${status.bg} ${status.text} ${status.border}`}
@@ -211,6 +198,19 @@ function PropertyCard({ property, isFavorite, onToggleFavorite, isLoggedIn }) {
             {property.propertyType}
           </span>
         )}
+        {/* Favorite toggle — bottom-right of image */}
+        <button
+          type="button"
+          onClick={() => isLoggedIn && onToggleFavorite?.(property.id)}
+          aria-label={isFavorite ? "Remove from saved" : "Save property"}
+          className={`absolute bottom-3 right-3 z-10 grid h-10 w-10 cursor-pointer place-items-center rounded-full shadow-md transition-all duration-200
+            ${isFavorite
+              ? "bg-orange text-white shadow-orange/30 hover:bg-orange-hover"
+              : "bg-white/90 backdrop-blur-sm text-slate-500 hover:bg-white hover:text-orange border border-white/20"
+            }`}
+        >
+          <Heart size={18} className={isFavorite ? "fill-current" : ""} strokeWidth={2} />
+        </button>
       </div>
 
       {/* Body */}
