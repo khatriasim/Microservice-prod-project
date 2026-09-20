@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 
 const GRAPHQL_URL = "http://localhost/graphql";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost";
 const MY_FAVORITES_QUERY = `
 query {
   myFavorites {
@@ -100,6 +101,63 @@ function AvatarStack({ size = "w-6 h-6", plus = true }) {
   );
 }
 
+function AgentToggleBtn() {
+  const [isAgent, setIsAgent] = useState(false);
+  const [loadingAgent, setLoadingAgent] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function checkAgent() {
+      try {
+        const res = await fetch(`${API_BASE}/api/check-agent/`, {
+          method: "GET",
+          credentials: "include",
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (!cancelled) setIsAgent(!!data.is_agent);
+        }
+      } catch {
+        // ignore
+      }
+    }
+    checkAgent();
+    return () => { cancelled = true; };
+  }, []);
+
+  async function handleClick() {
+    if (isAgent) return;
+    setLoadingAgent(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/check-agent/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
+      const data = await res.json();
+      setIsAgent(!!data.is_agent);
+    } catch {
+      // ignore
+    } finally {
+      setLoadingAgent(false);
+    }
+  }
+
+  return (
+    <button
+      onClick={handleClick}
+      disabled={loadingAgent || isAgent}
+      className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition shadow-md ${
+        isAgent
+          ? "bg-emerald-100 text-emerald-800 cursor-default"
+          : "bg-dark-green text-white hover:bg-dark-green-hover"
+      }`}
+    >
+      {loadingAgent ? "..." : isAgent ? "Agent Active" : "Be Agent"}
+    </button>
+  );
+}
+
 function Header({ user, loading, logout, favCount = 0 }) {
   return (
     <header className="relative z-30 shrink-0 w-full px-6 lg:px-12 py-4 flex items-center justify-between animate-fade-in delay-200">
@@ -130,6 +188,8 @@ function Header({ user, loading, logout, favCount = 0 }) {
         >
           <Search className="w-5 h-5" strokeWidth={2} />
         </button> */}
+
+        <AgentToggleBtn />
 
         <a
           href={"/favourite"}
@@ -165,7 +225,7 @@ function DesktopHero() {
 
       {/* Left listing card */}
       <a
-        href="#"
+        href="/view_property?id=26"
         className="absolute top-[50px] left-12 z-10 w-[clamp(160px,14vw,260px)] group animate-slide-in-left delay-600"
       >
         <div className="rounded-2xl overflow-hidden shadow-xl shadow-dark-green/10 group-hover:shadow-2xl transition-shadow relative">
@@ -184,7 +244,7 @@ function DesktopHero() {
             Modern Family Villa
           </p>
           <p className="text-[clamp(10px,0.95vw,13px)] font-bold text-dark-green">
-            $549,000
+            Rs 52.23 Crore
           </p>
         </div>
         <div className="absolute bottom-3 right-3 h-9 w-9 rounded-full bg-dark-green text-white flex items-center justify-center shadow-lg group-hover:bg-dark-green-hover transition-colors">
@@ -315,7 +375,7 @@ function TabletHero() {
 
       {/* Left listing card */}
       <a
-        href="#"
+        href="/view_property?id=26"
         className="absolute top-[80px] left-4 z-10 w-[160px] group animate-slide-in-left delay-600"
       >
         <div className="relative rounded-2xl overflow-hidden shadow-xl shadow-dark-green/10 group-hover:shadow-2xl transition-shadow">
@@ -340,7 +400,7 @@ function TabletHero() {
 
       {/* Right video / tour card */}
       <a
-        href="#"
+        href="/view_estate"
         className="absolute top-[80px] right-4 z-10 w-[120px] group animate-slide-in-right delay-700"
       >
         <div className="relative rounded-2xl overflow-hidden shadow-xl shadow-dark-green/10 group-hover:shadow-2xl transition-shadow aspect-177/287">
@@ -405,7 +465,7 @@ function MobileHero() {
 
       {/* Two cards side by side */}
       <div className="flex gap-3 mb-5">
-        <a href="#" className="flex-1 group animate-slide-in-left delay-300">
+        <a href="/view_property?id=26" className="flex-1 group animate-slide-in-left delay-300">
           <div className="relative aspect-square rounded-2xl overflow-hidden shadow-xl shadow-dark-green/10 group-hover:shadow-2xl transition-shadow">
             <Image
               src={IMAGES.listing}
@@ -419,7 +479,7 @@ function MobileHero() {
             </div>
           </div>
           <div className="mt-2 text-xs font-medium text-gray-700">Modern Family Villa</div>
-          <div className="text-xs font-bold text-dark-green">$549,000</div>
+          <div className="text-xs font-bold text-dark-green">Rs 52.23 Crore</div>
         </a>
 
         <a href="#" className="w-[45%] group animate-slide-in-right delay-400">

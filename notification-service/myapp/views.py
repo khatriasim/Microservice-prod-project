@@ -114,10 +114,14 @@ class VerifyTokenView(APIView):
 
     def get(self, request):
         user = request.user
+        profile = getattr(user, "userprofiles", None)
+        picture = getattr(profile, "profile_image_url", None) or None
         return Response({
             "user_id": user.id,
             "email": user.email,
+            "username": user.username,
             "name": user.get_full_name() or user.username,
+            "picture": picture,
         })
 
 @extend_schema(tags=['Auth'])
@@ -321,7 +325,24 @@ class VerifyOTPView(APIView):
             return Response({"message":"account verified"}, status=status.HTTP_200_OK)
         else:
             return Response({"message":"OTP not matched"}, status=status.HTTP_400_BAD_REQUEST)
-        
+
+class AgentStatusView(APIView):
+    authentication_classes = [CookieJWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        profile = getattr(request.user, "userprofiles", None)
+        return Response({
+            "is_agent": profile.is_agent if profile else False,
+            "email": request.user.email,
+        })
+
+    def post(self, request):
+        profile, _ = UserProfiles.objects.get_or_create(user=request.user)
+        profile.is_agent = True
+        profile.save()
+        return Response({"message": "You are now an agent", "is_agent": True})
+
 @extend_schema(tags=['Auth'])
 class GoogleLoginView(APIView):
     @extend_schema(
@@ -356,6 +377,12 @@ class GoogleLoginView(APIView):
             email=email,
             defaults={'username': email, 'first_name': name},
         )
+
+        # Ensure UserProfiles exists and store the Google profile picture.
+        profile, _ = UserProfiles.objects.get_or_create(user=user)
+        if picture:
+            profile.profile_image_url = picture
+            profile.save(update_fields=['profile_image_url'])
 
         refresh = CustomRefreshToken.for_user(user)
         access = str(refresh.access_token)

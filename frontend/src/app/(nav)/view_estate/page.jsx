@@ -19,6 +19,7 @@ import {
   AlertCircle,
   SlidersHorizontal,
   ChevronDown,
+  Plus,
 } from "lucide-react";
 
 /* ---------- constants ---------- */
@@ -678,7 +679,7 @@ export default function ViewEstatePage() {
         {/* ---- search (city + bedrooms) ---- */}
         <section className="w-full border-b border-slate-100 bg-white/40">
           <div className="mx-auto max-w-7xl px-5 py-8 lg:px-8 lg:py-10">
-            <header className="mb-5 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+            <header className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-2.5">
                 <span className="grid h-10 w-10 place-items-center rounded-xl bg-dark-green/10 text-dark-green">
                   <Search size={20} />
@@ -692,6 +693,17 @@ export default function ViewEstatePage() {
                   </p>
                 </div>
               </div>
+
+              {/* Create Property — above the listings, only for logged-in agents */}
+              {user && (
+                <Link
+                  href="/create_property"
+                  className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-orange px-5 text-sm font-semibold text-white shadow-md shadow-orange/20 transition duration-200 hover:bg-orange-hover focus:outline-none focus-visible:ring-4 focus-visible:ring-orange/20"
+                >
+                  <Plus size={16} />
+                  Create Property
+                </Link>
+              )}
             </header>
 
             <form onSubmit={handleSearch} className="flex flex-col gap-4">

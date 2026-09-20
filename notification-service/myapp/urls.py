@@ -1,4 +1,4 @@
-from .views import RegisterView, LoginView, ProfileView, LogoutView, ChangePasswordView, UpdateProfileView
+from .views import RegisterView, LoginView, ProfileView, LogoutView, ChangePasswordView, UpdateProfileView, AgentStatusView
 from .views import VerifyOTPView, GoogleLoginView, ResendOTPView, ResetPassword, VerifyTokenView, Agent
 from rest_framework_simplejwt.views import TokenRefreshView
 from django.urls import path
@@ -21,4 +21,5 @@ urlpatterns = [
     path('auth/google/', GoogleLoginView.as_view(), name='google-login'),
     path('verify-token/', VerifyTokenView.as_view(), name='verify-token'),
     path('get-agents/', Agent.as_view(), name='agents'),
+    path('check-agent/', AgentStatusView.as_view(), name='agents'),
 ]

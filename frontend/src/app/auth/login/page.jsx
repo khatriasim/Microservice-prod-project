@@ -42,7 +42,7 @@ function loadGoogleIdentityScript() {
     s.src = GOOGLE_SCRIPT_SRC;
     s.async = true;
     s.onload = () => resolve();
-    s.onerror = () => reject(new Error("script load failed"));
+    s.onerror = () => reject(new Error("script load failed"));``
     document.head.appendChild(s);
   });
 }
@@ -205,7 +205,7 @@ export default function LoginPage() {
 
             <div className="space-y-6">
               <h1 className="font-serif-display text-4xl xl:text-[2.75rem] leading-tight">
-                Welcome back to
+                Bye Bye back to
                 <br />
                 the home you&apos;ll love.
               </h1>
