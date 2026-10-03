@@ -39,21 +39,21 @@ query {
 
 const IMAGES = {
   listing:
-    "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=520&q=80",
+    "/ChatGPT Image Sep 13, 2026, 05_05_49 PM.png",
   video:
-    "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=354&q=80",
+    "/placeholder-villa.png",
   bottomLeft:
-    "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=640&q=80",
+    "/placeholder-penthouse.png",
   bottomCenter:
-    "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=800&q=80",
+    "/placeholder-condo.png",
   bottomRight:
-    "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=640&q=80",
+    "/placeholder-farmhouse.png",
   agent:
-    "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=128&q=80",
+    "/placeholder-villa.png",
   avatar1:
-    "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=64&q=80",
+    "/placeholder-condo.png",
   avatar2:
-    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=64&q=80",
+    "/placeholder-farmhouse.png",
 };
 
 function Logo() {

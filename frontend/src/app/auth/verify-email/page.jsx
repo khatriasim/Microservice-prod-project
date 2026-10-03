@@ -231,7 +231,7 @@ function VerifyEmailContent() {
       {/* === Left / brand panel (decorative, hidden on mobile) === */}
       <aside className="relative hidden w-[46%] max-w-140 overflow-hidden lg:block">
         <Image
-          src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80"
+          src="/ChatGPT Image Sep 13, 2026, 05_05_49 PM.png"
           alt="Modern luxury home at dusk"
           fill
           priority

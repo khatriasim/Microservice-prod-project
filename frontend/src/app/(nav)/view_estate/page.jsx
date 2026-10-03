@@ -20,6 +20,7 @@ import {
   SlidersHorizontal,
   ChevronDown,
   Plus,
+  Building,
 } from "lucide-react";
 
 /* ---------- constants ---------- */
@@ -121,11 +122,10 @@ const LISTING_PHOTOS = [
   "photo-1616486338812-3dadae4b4ace",
   "photo-1560448204-e02f11c3d0e2",
 ];
-const UNSPLASH_BASE = "https://images.unsplash.com";
-
+const LISTING_PHOTOS = ["/ChatGPT Image Sep 13, 2026, 05_05_49 PM.png","/placeholder-villa.png","/placeholder-penthouse.png"];
 function getPhotoUrl(id) {
   const photoId = LISTING_PHOTOS[(id - 1 + LISTING_PHOTOS.length) % LISTING_PHOTOS.length];
-  return `${UNSPLASH_BASE}/${photoId}?auto=format&fit=crop&w=640&q=80`;
+  return photoId;
 }
 
 /* ---------- helpers ---------- */
@@ -181,7 +181,7 @@ function PropertyCard({ property, isFavorite, onToggleFavorite, isLoggedIn }) {
       {/* Image */}
       <div className="relative aspect-16/10 w-full overflow-hidden">
         <Image
-          src={getPhotoUrl(property.id)}
+          src={property.imageUrl ? `http://localhost${property.imageUrl}` : getPhotoUrl(property.id)}
           alt={property.title || "Property listing"}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -385,7 +385,7 @@ function FilterSelect({ label, value, onChange, options }) {
 
 /* =================== PAGE =================== */
 export default function ViewEstatePage() {
-  const { user, loading: authLoading, logout } = useAuth();
+  const { user, loading: authLoading, logout, isAgent } = useAuth();
 
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -695,14 +695,23 @@ export default function ViewEstatePage() {
               </div>
 
               {/* Create Property — above the listings, only for logged-in agents */}
-              {user && (
-                <Link
-                  href="/create_property"
-                  className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-orange px-5 text-sm font-semibold text-white shadow-md shadow-orange/20 transition duration-200 hover:bg-orange-hover focus:outline-none focus-visible:ring-4 focus-visible:ring-orange/20"
-                >
-                  <Plus size={16} />
-                  Create Property
-                </Link>
+              {user && isAgent && (
+                <div className="flex items-center gap-3">
+                  <Link
+                    href="/agent_prop"
+                    className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-dark-green/10 px-5 text-sm font-semibold text-dark-green hover:bg-dark-green/20 transition"
+                  >
+                    <Building size={16} />
+                    Your Properties
+                  </Link>
+                  <Link
+                    href="/create_property"
+                    className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-orange px-5 text-sm font-semibold text-white shadow-md shadow-orange/20 transition duration-200 hover:bg-orange-hover focus:outline-none focus-visible:ring-4 focus-visible:ring-orange/20"
+                  >
+                    <Plus size={16} />
+                    Create Property
+                  </Link>
+                </div>
               )}
             </header>
 

@@ -9,64 +9,6 @@ from app.models.user import User
 from app.models.search_log import SearchLog
 from app.core.recommendation import build_user_profile, score_property
 
-
-# def _closeness(actual, target, tolerance=1.0):
-#     if actual is None or target is None or target == 0:
-#         return 0.0
-#     ratio = abs(actual - target) / target
-#     return max(0.0, 1.0 - ratio / tolerance)
-
-
-# def _price_closeness(price, min_price, max_price):
-#     if price is None:
-#         return 0.0
-
-#     # Both bounds given
-#     if min_price is not None and max_price is not None:
-#         if min_price <= price <= max_price:
-#             return 1.0
-#         midpoint = (min_price + max_price) / 2
-#         return _closeness(price, midpoint, tolerance=2.0)
-
-#     # Only a minimum
-#     if min_price is not None:
-#         if price >= min_price:
-#             return 1.0
-#         return _closeness(price, min_price, tolerance=2.0)
-
-#     # Only a maximum
-#     if max_price is not None:
-#         if price <= max_price:
-#             return 1.0
-#         return _closeness(price, max_price, tolerance=2.0)
-
-#     return 0.0
-
-
-# def _score_property(p, city, min_price, max_price, bedrooms, bathrooms, property_type):
-#     score = 0.0
-
-#     # Categorical: exact match (case-insensitive, trimmed — remember the
-#     # "lalitpur" vs "Lalitpur" bug from the recommendation algorithm)
-#     if city:
-#         if p.city and p.city.strip().lower() == city.strip().lower():
-#             score += 3.0
-
-#     if property_type:
-#         if p.property_type and p.property_type.strip().lower() == property_type.strip().lower():
-#             score += 1.5
-
-#     # Numeric: graded by closeness
-#     if min_price is not None or max_price is not None:
-#         score += 2.5 * _price_closeness(p.price, min_price, max_price)
-
-#     if bedrooms is not None:
-#         score += 1.5 * _closeness(p.bedrooms, bedrooms, tolerance=1.0)
-
-#     if bathrooms is not None:
-#         score += 1.0 * _closeness(p.bathrooms, bathrooms, tolerance=1.0)
-
-#     return score
 @strawberry.type
 class PropertyQuery:
 
@@ -208,6 +150,7 @@ class PropertyQuery:
                     area=p.area,
                     address=p.address,
                     property_type=p.property_type,
+                    image_url=p.image_url,
                 )
                 for p, score in top
             ]
@@ -238,6 +181,7 @@ class PropertyQuery:
                 area=prop.area,
                 address=prop.address,
                 property_type=prop.property_type,
+                image_url=prop.image_url,
             )
         finally:
             db.close()      
@@ -277,6 +221,7 @@ def _to_property_types(props):
                 area=p.area,
                 address=p.address,
                 property_type=p.property_type,
+                image_url=p.image_url,
             )
             for p in props
         ]

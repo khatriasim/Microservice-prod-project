@@ -213,7 +213,7 @@ export default function RegisterPage() {
         {/* === Left / brand panel (decorative, hidden on mobile) === */}
         <aside className="relative hidden w-[46%] max-w-140 overflow-hidden lg:block">
           <Image
-            src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"
+            src="/placeholder-villa.png"
             alt="Luxury home entrance with warm lighting"
             fill
             priority

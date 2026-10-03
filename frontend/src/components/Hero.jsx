@@ -40,7 +40,7 @@ export default function Hero() {
           {/* Property image */}
           <div className="relative aspect-[4/3] overflow-hidden rounded-2xl shadow-2xl lg:aspect-[5/4]">
             <Image
-              src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=960&q=80"
+              src="/ChatGPT Image Sep 13, 2026, 05_05_49 PM.png"
               alt="Modern luxury villa"
               fill
               className="object-cover"

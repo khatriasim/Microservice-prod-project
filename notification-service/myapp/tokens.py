@@ -8,5 +8,6 @@ class CustomRefreshToken(RefreshToken):
         # RefreshToken.access_token copies these claims into every new access token.
         token['name'] = user.get_full_name() or user.username or user.email
         token['email'] = user.email
-        token.access_token['type'] = 'access'
+        profile = getattr(user, "userprofiles", None)
+        token['is_agent'] = bool(profile and profile.is_agent)
         return token

@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.api.v1.router import api_router
 from app.core.database import Base, engine
@@ -9,6 +10,9 @@ import redis.asyncio as aioredis
 from app.graphql.schema import schema, graphql_router
 from strawberry.fastapi import GraphQLRouter
 from app.core.kafka import get_kafka_producer, producer
+from fastapi.staticfiles import StaticFiles
+from app.api.upload import router as upload_router
+
 
 
 @asynccontextmanager
@@ -36,13 +40,24 @@ app = FastAPI(
     debug=settings.DEBUG,
     lifespan=lifespan
 )
+
+# CORS — allow Next.js dev server and Traefik
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://localhost:80", "http://localhost:8080"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.add_middleware(
     TrustedHostMiddleware,
     allowed_hosts=["localhost", "127.0.0.1", "testserver", "fastapi.local", "*.railway.app","fastapi-production-5801.up.railway.app", ]
 )
 
 app.include_router(api_router)
-
+app.mount("/static", StaticFiles(directory="static"), name = "Static")
+app.include_router(upload_router)
 graphql_app = GraphQLRouter(schema)
 app.include_router(graphql_router, prefix="/graphql")
 @app.get("/")
@@ -63,3 +78,4 @@ def whoami(request: Request):
         "host": request.headers.get("Host"),
         "proto": request.headers.get("X-Forwarded-Proto"),
         }
+

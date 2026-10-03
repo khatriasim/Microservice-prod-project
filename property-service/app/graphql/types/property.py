@@ -16,6 +16,7 @@ class PropertyType:
     address: Optional[str] = None
     property_type: Optional[str] = None
     agent_email : Optional[str] = None
+    image_url: Optional[str] = None
 
 
 
@@ -30,6 +31,7 @@ class CreatePropertyInput:
     bathrooms: Optional[int] = None
     area: Optional[float] = None
     address: Optional[str] = None
+    image_url: Optional[str] = None
 
 
 @strawberry.input
@@ -44,6 +46,7 @@ class UpdatePropertyInput:
     bathrooms: Optional[int] = None
     area: Optional[float] = None
     address: Optional[str] = None
+    image_url: Optional[str] = None
 
 # @strawberry.type
 # class Agents:

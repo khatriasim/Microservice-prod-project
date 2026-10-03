@@ -19,6 +19,9 @@ import {
   Loader2,
   List,
   Building,
+  Upload,
+  Image as ImageIcon,
+  X,
 } from "lucide-react";
 
 const GRAPHQL_URL = "http://localhost/graphql";
@@ -70,6 +73,8 @@ export default function CreatePropertyPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [images, setImages] = useState([]);
+  const [imageError, setImageError] = useState("");
 
   const propertyTypes = [
     "Apartment",
@@ -106,6 +111,56 @@ export default function CreatePropertyPage() {
     }
   };
 
+  const handleImageChange = async (e) => {
+    const files = Array.from(e.target.files);
+    setImageError("");
+    const validTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+    const maxSize = 5 * 1024 * 1024; // 5 MB — matches backend
+
+    const invalid = files.filter(
+      (f) => !validTypes.includes(f.type) || f.size > maxSize
+    );
+    if (invalid.length > 0) {
+      setImageError(
+        invalid.length === 1
+          ? "Please upload a valid image (JPG, PNG, WebP, GIF) under 5 MB"
+          : "Some files were skipped — only JPG, PNG, WebP, GIF under 5 MB are allowed"
+      );
+      e.target.value = "";
+      return;
+    }
+
+    // Upload each file to the backend
+    for (const file of files) {
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const response = await fetch("http://localhost/api/upload-image", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errData = await response.json();
+          throw new Error(errData.detail || "Upload failed");
+        }
+
+        const data = await response.json();
+        setImages((prev) => [...prev, data.image_url]);
+      } catch (err) {
+        console.error("Image upload error:", err);
+        setImageError("Failed to upload image. Please try again.");
+      }
+    }
+
+    e.target.value = "";
+  };
+
+  const removeImage = (index) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitError("");
@@ -120,13 +175,14 @@ export default function CreatePropertyPage() {
         title: formData.title.trim(),
         price: parsePrice(formData.price),
         city: formData.city.trim(),
-        status: formData.status || "available",
+        // status: formData.status || "available",
         propertyType: formData.propertyType,
         description: formData.description.trim(),
         bedrooms: Number(formData.bedrooms),
         bathrooms: Number(formData.bathrooms),
         area: Number(formData.area),
         address: formData.address.trim(),
+        imageUrl: images.length > 0 ? images[0] : null,
       },
     };
 
@@ -180,7 +236,7 @@ export default function CreatePropertyPage() {
             You need to be logged in as an agent to create property listings.
           </p>
           <Link
-            href="/auth"
+            href="/auth/login/"
             className="inline-flex items-center justify-center gap-2 rounded-xl bg-dark-green px-8 py-3 text-lg font-semibold text-white shadow-md shadow-dark-green/20 transition hover:bg-dark-green-hover"
           >
             <ArrowLeft size={18} />
@@ -220,20 +276,22 @@ export default function CreatePropertyPage() {
         {/* Sidebar / left nav */}
         <aside className="hidden md:block float-left w-56 shrink-0 sticky top-[4.5rem] self-start px-4 pt-8">
           <nav className="space-y-2">
-            <Link
-              href="/agent_prop"
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-dark-green transition"
-            >
-              <span className="grid h-8 w-8 place-items-center rounded-lg bg-orange/10 text-orange">
-                <Building size={16} strokeWidth={2.2} />
-              </span>
-              <span>Your Properties</span>
-            </Link>
+            {user && (
+              <Link
+                href="/agent_prop"
+                className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-dark-green transition"
+              >
+                <span className="grid h-8 w-8 place-items-center rounded-lg bg-orange/10 text-orange">
+                  <Building size={16} strokeWidth={2.2} />
+                </span>
+                <span>Your Properties</span>
+              </Link>
+            )}
           </nav>
         </aside>
 
         <div className="w-full border-b border-slate-100 bg-white/50">
-          <div className="mx-auto max-w-3xl px-5 py-8 lg:px-8 lg:py-10">
+          <div className="mx-auto max-w-3xl px-5 py-8 lg:px-8 lg:py-5">
             <h1 className="font-serif-display text-4xl text-dark-green leading-tight">
               Create New Listing
             </h1>
@@ -244,9 +302,11 @@ export default function CreatePropertyPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="flex-1 flex flex-col px-5 py-8 lg:px-8 lg:py-10">
-          <div className="mx-auto max-w-3xl w-full">
-            <div className="space-y-6">
-              {/* Title */}
+          <div className="mx-auto max-w-6xl w-full">
+            <div className="grid gap-8 lg:grid-cols-12 lg:items-start">
+              {/* Left: Input fields */}
+              <div className="lg:col-span-7 space-y-6">
+                {/* Title */}
               <div>
                 <label htmlFor="title" className={labelClass}>
                   <span className="flex items-center gap-2">
@@ -294,7 +354,7 @@ export default function CreatePropertyPage() {
 </div>
 
               {/* Status */}
-              <div>
+              {/* <div>
                 <label className={labelClass}>Status</label>
                 <div className="flex gap-3">
                   <button
@@ -312,7 +372,7 @@ export default function CreatePropertyPage() {
                     Sold
                   </button>
                 </div>
-              </div>
+              </div> */}
 
               {/* City & Property Type - side by side */}
               <div className="grid gap-4 sm:grid-cols-2">
@@ -488,26 +548,76 @@ export default function CreatePropertyPage() {
                 </div>
               )}
 
-              {/* Submit Button */}
-              <div className="pt-4 border-t border-slate-100">
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="w-full inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-orange px-8 text-base font-semibold text-white shadow-md shadow-orange/20 transition duration-200 hover:bg-orange-hover focus:outline-none focus-visible:ring-4 focus-visible:ring-orange/20 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {submitting ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      Creating…
-                    </>
-                  ) : (
-                    <>
-                      <FileText size={18} />
-                      Create Property Listing
-                    </>
-                  )}
-                </button>
-              </div>
+              </div> {/* end left col */}
+
+              {/* Right: Image upload + create button sticky */}
+              <aside className="lg:col-span-5">
+                <div className="sticky top-24 space-y-6">
+                  {/* Image Upload */}
+                  <div>
+                    <label className={labelClass}>
+                      <span className="flex items-center gap-2">
+                        <ImageIcon size={16} className="text-slate-400" />
+                        Property Images
+                      </span>
+                    </label>
+                    <label htmlFor="image-upload" className="cursor-pointer block">
+                      <div
+                        className={`rounded-2xl border-2 border-dashed p-6 transition ${
+                          images.length > 0
+                            ? "border-orange/40 bg-orange/5"
+                            : "border-slate-300 bg-slate-50 hover:border-orange/60 hover:bg-orange/5"
+                        }`}
+                      >
+                        <div className="flex flex-col items-center gap-4 text-center">
+                          <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-orange text-white shadow-md shadow-orange/20 transition hover:scale-105 hover:bg-orange-hover">
+                            <Upload size={22} />
+                          </span>
+                          <div>
+                            <p className="text-sm font-semibold text-slate-700">
+                              Click to upload property images
+                            </p>
+                            <p className="text-xs text-slate-400 mt-1">
+                              JPG, PNG, WebP, GIF — up to 5 MB each
+                            </p>
+                          </div>
+                        </div>
+                      <input
+                        id="image-upload"
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/gif"
+                        multiple
+                        onChange={handleImageChange}
+                        className="hidden"
+                      />
+                      {images.length > 0 && (
+                        <div className="mt-5 grid grid-cols-3 gap-3 sm:grid-cols-4">
+                          {images.map((file, idx) => (
+                            <div key={idx} className="group relative overflow-hidden rounded-xl border border-slate-200 shadow-sm">
+                              <img src={file} alt={`Property ${idx + 1}`} className="h-24 w-full object-cover transition group-hover:scale-105" />
+                              <button type="button" onClick={() => removeImage(idx)} className="absolute right-1.5 top-1.5 grid h-6 w-6 place-items-center rounded-full bg-black/50 text-white opacity-0 transition hover:bg-red-500 group-hover:opacity-100" aria-label="Remove image"><X size={12} /></button>
+                              <div className="absolute bottom-1 left-1 rounded bg-black/50 px-1.5 py-0.5 text-[10px] text-white font-medium">{(file?.split?.("/")?.pop?.() ?? "image").slice(0, 12)}</div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      </div>
+                    </label>
+                    {imageError && <p className={errorClass}><AlertCircle size={14} />{imageError}</p>}
+                  </div>
+
+                  {/* Submit Button in right sticky column */}
+                  <div className="pt-2">
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="w-full inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-orange px-8 text-base font-semibold text-white shadow-md shadow-orange/20 transition duration-200 hover:bg-orange-hover focus:outline-none focus-visible:ring-4 focus-visible:ring-orange/20 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {submitting ? (<> <Loader2 className="w-5 h-5 animate-spin" /> Creating… </>) : (<> <FileText size={18} /> Create Property Listing </>)}
+                    </button>
+                  </div>
+                </div>
+              </aside>
             </div>
           </div>
         </form>

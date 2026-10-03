@@ -57,7 +57,7 @@ services:
       - microservices-network
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.property.rule=PathPrefix(`/graphql`)"
+      - "traefik.http.routers.property.rule=PathPrefix(`/graphql`) || PathPrefix(`/static`) || PathPrefix(`/api/upload-image`)"
       - "traefik.http.routers.property.middlewares=property-ratelimit,cors"
       - "traefik.http.middlewares.property-ratelimit.ratelimit.average=20"
       - "traefik.http.middlewares.property-ratelimit.ratelimit.burst=40"
@@ -66,6 +66,8 @@ services:
       - "traefik.http.middlewares.cors.headers.accesscontrolallowheaders=Content-Type,Authorization"
       - "traefik.http.middlewares.cors.headers.accesscontrolallowcredentials=true"
       - "traefik.http.services.property.loadbalancer.server.port=8000"
+    volumes:
+      - property-uploads:/app/static/uploads
 
 
   property-db:
@@ -199,6 +201,7 @@ services:
 volumes:
   property-db-data:
   notification-db-data:
+  property-uploads:
 
 
 networks:

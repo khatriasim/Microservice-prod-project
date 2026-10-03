@@ -409,7 +409,7 @@ function ViewPropertyContent() {
           {/* image */}
           <div className="relative aspect-16/10 w-full overflow-hidden rounded-3xl shadow-lg">
             <Image
-              src={getPhotoUrl(property.id)}
+              src={property.imageUrl ? `http://localhost${property.imageUrl}` : getPhotoUrl(property.id)}
               alt={property.title || "Property"}
               fill
               priority

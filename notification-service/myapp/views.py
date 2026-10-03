@@ -16,6 +16,7 @@ from django.conf import settings
 from .tokens import CustomRefreshToken
 from drf_spectacular.utils import extend_schema, inline_serializer
 from .authentication import CookieJWTAuthentication
+
 @extend_schema(tags=['Auth'])
 class RegisterView(APIView):
     @extend_schema(
@@ -122,6 +123,7 @@ class VerifyTokenView(APIView):
             "username": user.username,
             "name": user.get_full_name() or user.username,
             "picture": picture,
+            "is_agent": bool(profile and profile.is_agent)
         })
 
 @extend_schema(tags=['Auth'])

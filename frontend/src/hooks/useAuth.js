@@ -37,5 +37,5 @@ export function useAuth() {
     router.push("/");
   };
 
-  return { user, loading, logout };
+  return { user, loading, logout, isAuthenticated : !!user, isAgent: !!user?.is_agent, };
 }
