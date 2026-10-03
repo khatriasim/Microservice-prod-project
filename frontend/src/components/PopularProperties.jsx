@@ -8,7 +8,7 @@ export default function PopularProperties() {
       city: "Lakeside",
       beds: 4,
       baths: 3,
-      image: "/property-villa.jpg",
+      image: "/ChatGPT Image Sep 13, 2026, 05_05_49 PM.png",
     },
     {
       title: "Urban Penthouse",
@@ -16,7 +16,7 @@ export default function PopularProperties() {
       city: "Downtown",
       beds: 2,
       baths: 2,
-      image: "/property-estate.jpg",
+      image: "/ChatGPT Image Sep 13, 2026, 05_05_49 PM.png",
     },
     {
       title: "Countryside Farmhouse",
@@ -24,7 +24,7 @@ export default function PopularProperties() {
       city: "Countryside",
       beds: 3,
       baths: 2,
-      image: "/property-modern.jpg",
+      image: "/ChatGPT Image Sep 13, 2026, 05_05_49 PM.png",
     },
     {
       title: "Skyline Condo",
@@ -32,7 +32,7 @@ export default function PopularProperties() {
       city: "Metro",
       beds: 2,
       baths: 2,
-      image: "/property-pool.jpg",
+      image: "/ChatGPT Image Sep 13, 2026, 05_05_49 PM.png",
     },
   ];
   return (

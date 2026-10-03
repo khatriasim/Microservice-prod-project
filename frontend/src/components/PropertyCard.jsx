@@ -2,13 +2,13 @@ import Image from "next/image";
 
 export default function PropertyCard({ title, price, city, beds, baths, image }) {
   return (
-    <article className="card-elevated border border-cream-200 rounded-2xl overflow-hidden hover:transform hover:translate-y-[-4px] transition-all duration-300 aspect-[3/4]">
+    <article className="card-elevated border border-cream-200 rounded-2xl overflow-hidden hover:transform hover:translate-y-[-4px] transition-all duration-300 aspect-[3/4] bg-[#ebeae3]">
       <div className="relative overflow-hidden aspect-[4/5]">
         <Image
           src={image}
           alt={title}
           fill
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-contain bg-[#ebeae3]"
           priority
         />
         <div

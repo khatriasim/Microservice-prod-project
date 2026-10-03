@@ -39,21 +39,21 @@ query {
 
 const IMAGES = {
   listing:
-    "/property-villa.jpg",
+    "/51.jpeg",
   video:
-    "/property-interior.jpg",
+    "/10.jpeg",
   bottomLeft:
-    "/property-villa.jpg",
+    "/2.jpg",
   bottomCenter:
-    "/property-modern.jpg",
+    "/10.jpeg",
   bottomRight:
-    "/property-pool.jpg",
+    "/6.jpg",
   agent:
     "/property-estate.jpg",
   avatar1:
-    "/property-villa.jpg",
+    "/2.jpg",
   avatar2:
-    "/property-interior.jpg",
+    "/6.jpg",
 };
 
 function Logo() {
@@ -225,14 +225,14 @@ function DesktopHero() {
 
       {/* Left listing card */}
       <a
-        href="/view_property?id=26"
+        href="/view_property?id=42"
         className="absolute top-[50px] left-12 z-10 w-[clamp(160px,14vw,260px)] group animate-slide-in-left delay-600"
       >
         <div className="rounded-2xl overflow-hidden shadow-xl shadow-dark-green/10 group-hover:shadow-2xl transition-shadow relative">
           <div className="relative aspect-260/257">
             <Image
               src={IMAGES.listing}
-              alt="Modern family villa exterior"
+              alt="3 stories mid house"
               fill
               sizes="(max-width: 1024px) 160px, 260px"
               className="object-cover group-hover:scale-[1.02] transition-transform duration-700"
@@ -241,10 +241,10 @@ function DesktopHero() {
         </div>
         <div className="mt-3">
           <p className="text-[clamp(11px,1.1vw,14px)] font-medium text-gray-700">
-            Modern Family Villa
+            3 stories mid house
           </p>
           <p className="text-[clamp(10px,0.95vw,13px)] font-bold text-dark-green">
-            Rs 52.23 Crore
+            NPR 5,000,000,00
           </p>
         </div>
         <div className="absolute bottom-3 right-3 h-9 w-9 rounded-full bg-dark-green text-white flex items-center justify-center shadow-lg group-hover:bg-dark-green-hover transition-colors">
@@ -290,17 +290,7 @@ function DesktopHero() {
             </span>
           </div>
           <AvatarStack />
-          <div className="flex items-center gap-2 mt-2">
-            <div className="relative h-10 w-10 rounded-full overflow-hidden ring-2 ring-background shadow-md">
-              <Image
-                src="/property-estate.jpg"
-                alt="Sold property"
-                fill
-                className="object-cover"
-                sizes="40px"
-              />
-            </div>
-          </div>
+         
         </div>
 
         {/* Center badge — CTA */}
@@ -401,8 +391,8 @@ function TabletHero() {
           </div>
         </div>
         <div className="mt-2">
-          <p className="text-xs font-medium text-gray-700">Modern Family Villa</p>
-          <p className="text-xs font-bold text-dark-green">$549,000</p>
+          <p className="text-xs font-medium text-gray-700">3 stories mid house</p>
+          <p className="text-xs font-bold text-dark-green">NPR 5,000,000,00</p>
         </div>
         <div className="absolute bottom-2 right-2 h-8 w-8 rounded-full bg-dark-green text-white flex items-center justify-center shadow-lg group-hover:bg-dark-green-hover transition-colors">
           <ArrowUpRight className="w-4 h-4" />
