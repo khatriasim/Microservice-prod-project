@@ -24,6 +24,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { useAuth } from "@/hooks/useAuth";
 import {
   getPhotoUrl,
+  getPropertyImageUrl,
   formatPrice,
   formatArea,
   getStatus,
@@ -48,6 +49,7 @@ query ViewProperty($id: Int!) {
     area
     address
     propertyType
+    imageUrl
   }
 }`;
 
@@ -409,7 +411,7 @@ function ViewPropertyContent() {
           {/* image */}
           <div className="relative aspect-16/10 w-full overflow-hidden rounded-3xl shadow-lg">
             <Image
-              src={property.imageUrl ? `http://localhost${property.imageUrl}` : getPhotoUrl(property.id)}
+              src={getPropertyImageUrl(property.imageUrl, property.id)}
               alt={property.title || "Property"}
               fill
               priority

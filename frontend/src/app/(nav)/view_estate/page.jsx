@@ -22,6 +22,7 @@ import {
   Plus,
   Building,
 } from "lucide-react";
+import { getPhotoUrl, getPropertyImageUrl } from "@/lib/property";
 
 /* ---------- constants ---------- */
 const API_URL = "http://localhost/graphql";
@@ -40,6 +41,7 @@ query {
     propertyType
     agentName
     agentEmail
+    imageUrl
   }
 }`;
 
@@ -58,6 +60,7 @@ query {
     propertyType
     agentName
     agentEmail
+    imageUrl
   }
 }`;
 
@@ -105,33 +108,9 @@ query SearchProperties(
     propertyType
     agentName
     agentEmail
+    imageUrl
   }
 }`;
-
-const LISTING_PHOTOS = [
-  "photo-1512917774080-9991f1c4c750",
-  "photo-1600596542815-ffad4c1539a9",
-  "photo-1600585154340-be6161a56a0c",
-  "photo-1600607687939-ce8a6c25118c",
-  "photo-1600566753086-00f18fb6b3ea",
-  "photo-1502005229762-cf1b2da7c5d6",
-  "photo-1600210492486-724fe5c67fb0",
-  "photo-1605276374104-dee2a0ed3cd6",
-  "photo-1600047509807-ba8f99d2cdde",
-  "photo-1613490493576-7fde63acd811",
-  "photo-1616486338812-3dadae4b4ace",
-  "photo-1560448204-e02f11c3d0e2",
-];
-/* ---------- helpers ---------- */
-function getPhotoUrl(id) {
-  const LISTING_PHOTOS = [
-    "/ChatGPT Image Sep 13, 2026, 05_05_49 PM.png",
-    "/placeholder-villa.png",
-    "/placeholder-penthouse.png",
-  ];
-  const photoId = LISTING_PHOTOS[(id - 1 + LISTING_PHOTOS.length) % LISTING_PHOTOS.length];
-  return photoId;
-}
 
 /* ---------- helpers ---------- */
 function formatPrice(price) {
@@ -186,7 +165,7 @@ function PropertyCard({ property, isFavorite, onToggleFavorite, isLoggedIn }) {
       {/* Image */}
       <div className="relative aspect-16/10 w-full overflow-hidden">
         <Image
-          src={property.imageUrl ? `http://localhost${property.imageUrl}` : getPhotoUrl(property.id)}
+          src={getPropertyImageUrl(property.imageUrl, property.id)}
           alt={property.title || "Property listing"}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"

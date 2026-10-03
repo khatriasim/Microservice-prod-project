@@ -2,9 +2,16 @@
 
 const LISTING_PHOTOS = [
   "/ChatGPT Image Sep 13, 2026, 05_05_49 PM.png",
-  "/placeholder-villa.png",
-  "/placeholder-penthouse.png",
 ];
+
+const PROPERTY_API_URL = process.env.NEXT_PUBLIC_PROPERTY_API_URL || "http://localhost";
+
+/** Converts a property-service image path into a browser-accessible URL. */
+export function getPropertyImageUrl(imageUrl, fallbackId) {
+  if (!imageUrl) return getPhotoUrl(fallbackId);
+  if (/^https?:\/\//i.test(imageUrl)) return imageUrl;
+  return `${PROPERTY_API_URL}${imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`}`;
+}
 export function getPhotoUrl(id) {
   const photoId =
     LISTING_PHOTOS[(id - 1 + LISTING_PHOTOS.length) % LISTING_PHOTOS.length];

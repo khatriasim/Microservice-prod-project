@@ -39,21 +39,21 @@ query {
 
 const IMAGES = {
   listing:
-    "/ChatGPT Image Sep 13, 2026, 05_05_49 PM.png",
+    "/property-villa.jpg",
   video:
-    "/placeholder-villa.png",
+    "/property-interior.jpg",
   bottomLeft:
-    "/ChatGPT Image Sep 13, 2026, 05_05_49 PM.png",
+    "/property-villa.jpg",
   bottomCenter:
-    "/placeholder-villa.png",
+    "/property-modern.jpg",
   bottomRight:
-    "/placeholder-villa.png",
+    "/property-pool.jpg",
   agent:
-    "/placeholder-villa.png",
+    "/property-estate.jpg",
   avatar1:
-    "/ChatGPT Image Sep 13, 2026, 05_05_49 PM.png",
+    "/property-villa.jpg",
   avatar2:
-    "/placeholder-villa.png",
+    "/property-interior.jpg",
 };
 
 function Logo() {
@@ -293,7 +293,7 @@ function DesktopHero() {
           <div className="flex items-center gap-2 mt-2">
             <div className="relative h-10 w-10 rounded-full overflow-hidden ring-2 ring-background shadow-md">
               <Image
-                src="/ChatGPT Image Sep 13, 2026, 05_05_49 PM.png"
+                src="/property-estate.jpg"
                 alt="Sold property"
                 fill
                 className="object-cover"

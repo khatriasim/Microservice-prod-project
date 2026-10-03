@@ -213,7 +213,7 @@ export default function RegisterPage() {
         {/* === Left / brand panel (decorative, hidden on mobile) === */}
         <aside className="relative hidden w-[46%] max-w-140 overflow-hidden lg:block">
           <Image
-            src="/placeholder-villa.png"
+            src="/ChatGPT Image Sep 13, 2026, 05_05_49 PM.png"
             alt="Luxury home entrance with warm lighting"
             fill
             priority

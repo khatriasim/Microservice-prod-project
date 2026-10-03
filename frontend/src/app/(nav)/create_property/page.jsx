@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
 import {
@@ -23,8 +24,10 @@ import {
   Image as ImageIcon,
   X,
 } from "lucide-react";
+import { getPropertyImageUrl } from "@/lib/property";
 
-const GRAPHQL_URL = "http://localhost/graphql";
+const PROPERTY_API_URL = process.env.NEXT_PUBLIC_PROPERTY_API_URL || "http://localhost";
+const GRAPHQL_URL = `${PROPERTY_API_URL}/graphql`;
 
 const CREATE_PROPERTY_MUTATION = `
 mutation CreateProperty($input: CreatePropertyInput!) {
@@ -42,6 +45,7 @@ mutation CreateProperty($input: CreatePropertyInput!) {
     area
     address
     propertyType
+    imageUrl
   }
 }
 `;
@@ -136,7 +140,7 @@ export default function CreatePropertyPage() {
         const formData = new FormData();
         formData.append("file", file);
 
-        const response = await fetch("http://localhost/api/upload-image", {
+        const response = await fetch(`${PROPERTY_API_URL}/api/upload-image`, {
           method: "POST",
           body: formData,
         });
@@ -593,8 +597,8 @@ export default function CreatePropertyPage() {
                       {images.length > 0 && (
                         <div className="mt-5 grid grid-cols-3 gap-3 sm:grid-cols-4">
                           {images.map((file, idx) => (
-                            <div key={idx} className="group relative overflow-hidden rounded-xl border border-slate-200 shadow-sm">
-                              <img src={file} alt={`Property ${idx + 1}`} className="h-24 w-full object-cover transition group-hover:scale-105" />
+                            <div key={idx} className="group relative h-24 overflow-hidden rounded-xl border border-slate-200 shadow-sm">
+                              <Image src={getPropertyImageUrl(file)} alt={`Property ${idx + 1}`} fill sizes="(max-width: 640px) 33vw, 25vw" className="object-cover transition group-hover:scale-105" />
                               <button type="button" onClick={() => removeImage(idx)} className="absolute right-1.5 top-1.5 grid h-6 w-6 place-items-center rounded-full bg-black/50 text-white opacity-0 transition hover:bg-red-500 group-hover:opacity-100" aria-label="Remove image"><X size={12} /></button>
                               <div className="absolute bottom-1 left-1 rounded bg-black/50 px-1.5 py-0.5 text-[10px] text-white font-medium">{(file?.split?.("/")?.pop?.() ?? "image").slice(0, 12)}</div>
                             </div>

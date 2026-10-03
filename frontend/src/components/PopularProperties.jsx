@@ -8,7 +8,7 @@ export default function PopularProperties() {
       city: "Lakeside",
       beds: 4,
       baths: 3,
-      image: "/placeholder-villa.png",
+      image: "/property-villa.jpg",
     },
     {
       title: "Urban Penthouse",
@@ -16,7 +16,7 @@ export default function PopularProperties() {
       city: "Downtown",
       beds: 2,
       baths: 2,
-      image: "/placeholder-penthouse.png",
+      image: "/property-estate.jpg",
     },
     {
       title: "Countryside Farmhouse",
@@ -24,7 +24,7 @@ export default function PopularProperties() {
       city: "Countryside",
       beds: 3,
       baths: 2,
-      image: "/placeholder-farmhouse.png",
+      image: "/property-modern.jpg",
     },
     {
       title: "Skyline Condo",
@@ -32,7 +32,7 @@ export default function PopularProperties() {
       city: "Metro",
       beds: 2,
       baths: 2,
-      image: "/placeholder-condo.png",
+      image: "/property-pool.jpg",
     },
   ];
   return (

@@ -5,6 +5,7 @@ from app.api.v1.router import api_router
 from app.core.database import Base, engine
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 import socket
+import mimetypes
 from contextlib import asynccontextmanager
 import redis.asyncio as aioredis
 from app.graphql.schema import schema, graphql_router
@@ -13,6 +14,10 @@ from app.core.kafka import get_kafka_producer, producer
 from fastapi.staticfiles import StaticFiles
 from app.api.upload import router as upload_router
 
+# python:*-slim does not always ship the system MIME mapping for WebP. Without
+# this, StaticFiles responds with application/octet-stream and Next/Image
+# rejects otherwise valid uploaded WebP files.
+mimetypes.add_type("image/webp", ".webp")
 
 
 @asynccontextmanager
@@ -78,4 +83,3 @@ def whoami(request: Request):
         "host": request.headers.get("Host"),
         "proto": request.headers.get("X-Forwarded-Proto"),
         }
-
