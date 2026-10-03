@@ -122,8 +122,13 @@ const LISTING_PHOTOS = [
   "photo-1616486338812-3dadae4b4ace",
   "photo-1560448204-e02f11c3d0e2",
 ];
-const LISTING_PHOTOS = ["/ChatGPT Image Sep 13, 2026, 05_05_49 PM.png","/placeholder-villa.png","/placeholder-penthouse.png"];
+/* ---------- helpers ---------- */
 function getPhotoUrl(id) {
+  const LISTING_PHOTOS = [
+    "/ChatGPT Image Sep 13, 2026, 05_05_49 PM.png",
+    "/placeholder-villa.png",
+    "/placeholder-penthouse.png",
+  ];
   const photoId = LISTING_PHOTOS[(id - 1 + LISTING_PHOTOS.length) % LISTING_PHOTOS.length];
   return photoId;
 }

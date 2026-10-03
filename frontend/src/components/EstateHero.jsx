@@ -43,17 +43,17 @@ const IMAGES = {
   video:
     "/placeholder-villa.png",
   bottomLeft:
-    "/placeholder-penthouse.png",
+    "/ChatGPT Image Sep 13, 2026, 05_05_49 PM.png",
   bottomCenter:
-    "/placeholder-condo.png",
+    "/placeholder-villa.png",
   bottomRight:
-    "/placeholder-farmhouse.png",
+    "/placeholder-villa.png",
   agent:
     "/placeholder-villa.png",
   avatar1:
-    "/placeholder-condo.png",
+    "/ChatGPT Image Sep 13, 2026, 05_05_49 PM.png",
   avatar2:
-    "/placeholder-farmhouse.png",
+    "/placeholder-villa.png",
 };
 
 function Logo() {
@@ -290,6 +290,17 @@ function DesktopHero() {
             </span>
           </div>
           <AvatarStack />
+          <div className="flex items-center gap-2 mt-2">
+            <div className="relative h-10 w-10 rounded-full overflow-hidden ring-2 ring-background shadow-md">
+              <Image
+                src="/ChatGPT Image Sep 13, 2026, 05_05_49 PM.png"
+                alt="Sold property"
+                fill
+                className="object-cover"
+                sizes="40px"
+              />
+            </div>
+          </div>
         </div>
 
         {/* Center badge — CTA */}
