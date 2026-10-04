@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { buildWhatsAppLink } from "@/lib/property";
 import Link from "next/link";
 import {
   Home,

@@ -17,7 +17,16 @@ export function getPhotoUrl(id) {
     LISTING_PHOTOS[(id - 1 + LISTING_PHOTOS.length) % LISTING_PHOTOS.length];
   return photoId;
 }
+export function buildWhatsAppLink(phone, propertyId, propertyTitle) {
+  if (!phone) return null;
 
+  // Strip anything that isn't a digit (spaces, +, dashes, parentheses)
+  const cleanPhone = phone.replace(/\D/g, "");
+
+  const message = `Hi, I'm interested in your property "${propertyTitle}" (ID: ${propertyId}). Is it still available?`;
+
+  return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+}
 export function resolveImageUrl(property) {
   if (!property) return getPhotoUrl(1);
   return property.imageUrl
