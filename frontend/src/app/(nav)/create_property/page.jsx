@@ -187,7 +187,7 @@ export default function CreatePropertyPage() {
         bathrooms: Number(formData.bathrooms),
         area: Number(formData.area),
         address: formData.address.trim(),
-        agent_phone: formData.agentPhone ? formData.agentPhone.trim() : null,
+        agentPhone: formData.agentPhone ? formData.agentPhone.trim() : null,
         imageUrl: images.length > 0 ? images[0] : null,
       },
     };
