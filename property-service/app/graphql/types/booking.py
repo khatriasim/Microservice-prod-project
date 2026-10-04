@@ -15,4 +15,4 @@ class BookingType:
 class CreateBookingInput:
     property_id: int
     buyer_id: Optional[int] = None  # optional — the mutation always uses the authenticated user id
-    booking_date: str  
+    booking_date: Optional[str] = None  

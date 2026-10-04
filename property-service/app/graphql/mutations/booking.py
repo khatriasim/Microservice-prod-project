@@ -84,6 +84,35 @@ class BookingMutation:
             db.close()
 
     @strawberry.mutation
+    def update_booking(self, info: Info, id: int, booking_date: Optional[str] = None) -> Optional[BookingType]:
+        user_id = info.context["user_id"]
+        if not user_id:
+            raise Exception("Not authenticated")
+
+        db = SessionLocal()
+        try:
+            booking = db.query(Booking).filter(Booking.id == id).first()
+            if not booking:
+                return None
+            if booking.buyer_id != int(user_id):
+                raise Exception("Not your booking")
+            if booking_date is not None:
+                booking.booking_date = datetime.fromisoformat(booking_date.replace("Z", "+00:00")) if "Z" in booking_date else datetime.fromisoformat(booking_date)
+            db.commit()
+            db.refresh(booking)
+            return BookingType(
+                id=booking.id,
+                property_id=booking.property_id,
+                buyer_id=booking.buyer_id,
+                booking_date=str(booking.booking_date),
+                status=booking.status,
+                property_title=booking.property.title,
+                buyer_name=booking.booker_name or booking.buyer_id,
+            )
+        finally:
+            db.close()
+
+    @strawberry.mutation
     def update_booking_status(self, info: Info, id: int, status: str) -> Optional[BookingType]:
         user_id = info.context["user_id"]
         if not user_id:

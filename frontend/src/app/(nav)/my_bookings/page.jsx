@@ -1,10 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
-import { Home, ArrowLeft, Loader2, AlertCircle, Calendar, Building2, Trash2, CheckCircle2 } from "lucide-react";
+import { Home, ArrowLeft, Loader2, AlertCircle, Calendar, Building2, Trash2, PenSquare } from "lucide-react";
 
 const GRAPHQL_URL = "http://localhost/graphql";
 
@@ -14,10 +13,11 @@ mutation CancelBooking($id: Int!) {
 }
 `;
 
-const UPDATE_BOOKING_STATUS_MUTATION = `
-mutation UpdateBookingStatus($id: Int!, $status: String!) {
-  updateBookingStatus(id: $id, status: $status) {
+const UPDATE_BOOKING_MUTATION = `
+mutation UpdateBooking($id: Int!, $bookingDate: String!) {
+  updateBooking(id: $id, bookingDate: $bookingDate) {
     id
+    bookingDate
     status
   }
 }
@@ -39,49 +39,13 @@ query MyBookings {
 
 export default function MyBookingsPage() {
   const { user, loading: authLoading } = useAuth();
-  const router = useRouter();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   const [cancelingId, setCancelingId] = useState(null);
   const [editingId, setEditingId] = useState(null);
-  const [editStatus, setEditStatus] = useState("");
-
-  async function handleCancel(id) {
-    setCancelingId(id);
-    try {
-      const res = await fetch(GRAPHQL_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ query: CANCEL_BOOKING_MUTATION, variables: { id } }),
-      });
-      const json = await res.json();
-      if (json.errors) throw new Error(json.errors[0]?.message || "Failed to cancel");
-      fetchBookings();
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setCancelingId(null);
-    }
-  }
-
-  async function handleUpdate(id, status) {
-    try {
-      const res = await fetch(GRAPHQL_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ query: UPDATE_BOOKING_STATUS_MUTATION, variables: { id, status } }),
-      });
-      const json = await res.json();
-      if (json.errors) throw new Error(json.errors[0]?.message || "Failed to update");
-      fetchBookings();
-    } catch (err) {
-      setError(err.message);
-    }
-  }
+  const [editDate, setEditDate] = useState("");
 
   async function fetchBookings() {
     setLoading(true);
@@ -106,6 +70,44 @@ export default function MyBookingsPage() {
   useEffect(() => {
     if (!authLoading && user) fetchBookings();
   }, [authLoading, user]);
+
+  async function handleCancel(id) {
+    setCancelingId(id);
+    try {
+      const res = await fetch(GRAPHQL_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ query: CANCEL_BOOKING_MUTATION, variables: { id } }),
+      });
+      const json = await res.json();
+      if (json.errors) throw new Error(json.errors[0]?.message || "Failed to cancel");
+      fetchBookings();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setCancelingId(null);
+    }
+  }
+
+  async function handleUpdateDate(id) {
+    if (!editDate) return;
+    try {
+      const res = await fetch(GRAPHQL_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ query: UPDATE_BOOKING_MUTATION, variables: { id, bookingDate: editDate } }),
+      });
+      const json = await res.json();
+      if (json.errors) throw new Error(json.errors[0]?.message || "Failed to update date");
+      setEditingId(null);
+      setEditDate("");
+      fetchBookings();
+    } catch (err) {
+      setError(err.message);
+    }
+  }
 
   if (authLoading) {
     return (
@@ -175,7 +177,7 @@ export default function MyBookingsPage() {
           ) : (
             <div className="space-y-4">
               {bookings.map((b) => (
-                <div key={b.id} className="rounded-2xl border border-slate-100 bg-white shadow-sm p-6">
+                <div key={b.id ?? b.propertyId} className="rounded-2xl border border-slate-100 bg-white shadow-sm p-6">
                   <div className="flex items-start justify-between mb-3">
                     <h3 className="font-serif-display text-xl text-dark-green">{b.propertyTitle || "Property"}</h3>
                     <span className={`inline-block text-xs font-semibold px-2.5 py-1 rounded-full ${b.status === "pending" ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700"}`}>{b.status}</span>
@@ -191,12 +193,19 @@ export default function MyBookingsPage() {
                     </button>
                     {editingId === b.id ? (
                       <div className="flex items-center gap-2">
-                        <button onClick={() => handleUpdate(b.id, "confirmed")} className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition"><CheckCircle2 size={12}/> Confirmed</button>
-                        <button onClick={() => handleUpdate(b.id, "pending")} className="inline-flex items-center gap-1 rounded-lg bg-amber-50 px-2 py-1 text-xs font-semibold text-amber-600 hover:bg-amber-100 transition"><Loader2 size={12}/> Pending</button>
-                        <button onClick={() => setEditingId(null)} className="text-xs text-slate-500 hover:text-slate-700">Close</button>
+                        <input
+                          type="datetime-local"
+                          value={editDate ? editDate.slice(0, 16) : ""}
+                          onChange={(e) => setEditDate(e.target.value)}
+                          className="rounded-lg border border-slate-200 px-2 py-1 text-xs text-slate-700"
+                        />
+                        <button onClick={() => handleUpdateDate(b.id)} className="inline-flex items-center gap-1 rounded-lg bg-indigo-50 px-2 py-1 text-xs font-semibold text-indigo-600 hover:bg-indigo-100 transition"><PenSquare size={12} /> Save</button>
+                        <button onClick={() => { setEditingId(null); setEditDate(""); }} className="text-xs text-slate-500 hover:text-slate-700">Close</button>
                       </div>
                     ) : (
-                      <button onClick={() => { setEditingId(b.id); setEditStatus(b.status); }} className="inline-flex items-center gap-1 rounded-lg bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-100 transition">Edit</button>
+                      <button onClick={() => { setEditingId(b.id); setEditDate(b.bookingDate ? b.bookingDate.slice(0, 16).replace(' ','T') : ""); }} className="inline-flex items-center gap-1 rounded-lg bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-100 transition">
+                        <PenSquare size={12} /> Edit Date
+                      </button>
                     )}
                   </div>
                 </div>
