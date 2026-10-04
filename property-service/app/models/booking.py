@@ -9,6 +9,7 @@ class Booking(Base):
     id = Column(Integer, primary_key=True, index=True)
     property_id = Column(Integer, ForeignKey("properties.id"), nullable=False)
     buyer_id = Column(Integer, nullable=False)
+    booker_name = Column(String, nullable=False)
     booking_date = Column(DateTime, nullable=False)
     status = Column(String, nullable=False, default="pending")
     property = relationship("Property", back_populates="bookings")

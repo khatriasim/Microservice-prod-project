@@ -10,5 +10,6 @@ class Favorite(Base):
     user_id = Column(Integer, nullable=False, index=True)
     property_id = Column(Integer, ForeignKey("properties.id"), nullable=False, index=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    
 
     property = relationship("Property")

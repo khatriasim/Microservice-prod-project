@@ -25,7 +25,7 @@ class BookingQuery:
                     booking_date=str(b.booking_date),
                     status=b.status,
                     property_title=b.property.title,
-                    buyer_name=None,  # no local user table anymore — see note below
+                    buyer_name=b.booker_name,  # the booker's entered name
                 )
                 for b in bookings
             ]
@@ -35,6 +35,7 @@ class BookingQuery:
     @strawberry.field
     def property_bookings(self, info: Info, property_id: int) -> List[BookingType]:
         user_id = info.context["user_id"]
+        user_name = info.context["user_name"]
         if not user_id:
             raise Exception("Not authenticated")
 
@@ -54,7 +55,7 @@ class BookingQuery:
                     booking_date=str(b.booking_date),
                     status=b.status,
                     property_title=b.property.title,
-                    buyer_name=None,  # no local user table anymore — see note below
+                    buyer_name=b.booker_name,  # the name the booker entered when booking
                 )
                 for b in bookings
             ]

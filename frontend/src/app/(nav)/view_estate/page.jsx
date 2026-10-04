@@ -639,7 +639,7 @@ export default function ViewEstatePage() {
       <main className="flex-1">
         {/* ---- page title ---- */}
         <section className="w-full border-b border-dark-green/10 bg-white/50">
-          <div className="mx-auto max-w-7xl px-5 py-6 lg:px-8 lg:py-7">
+          <div className="mx-auto max-w-7xl px-5 py-6 lg:px-8 lg:py-2">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <h1 className="font-serif-display text-4xl text-dark-green leading-tight">
@@ -662,7 +662,7 @@ export default function ViewEstatePage() {
 
         {/* ---- search (city + bedrooms) ---- */}
         <section className="w-full border-b border-slate-100 bg-white/40">
-          <div className="mx-auto max-w-7xl px-5 py-8 lg:px-8 lg:py-10">
+          <div className="mx-auto max-w-7xl px-5 py-8 lg:px-8 lg:py-0">
             <header className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-2.5">
                 <span className="grid h-10 w-10 place-items-center rounded-xl bg-dark-green/10 text-dark-green">
@@ -867,7 +867,7 @@ export default function ViewEstatePage() {
         {/* ---- recommended (logged-in users only) ---- */}
         {!authLoading && user && (
           <section className="w-full border-b border-slate-100 bg-white/40">
-            <div className="mx-auto max-w-7xl px-5 py-8 lg:px-8 lg:py-10">
+            <div className="mx-auto max-w-7xl px-5 py-8 lg:px-8 lg:py-0">
               <header className="mb-5 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-2.5">
                   <span className="grid h-10 w-10 place-items-center rounded-xl bg-orange/10 text-orange">
