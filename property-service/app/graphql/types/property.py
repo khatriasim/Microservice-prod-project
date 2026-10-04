@@ -20,7 +20,6 @@ class PropertyType:
     agent_phone: Optional[str] = None
 
 
-
 @strawberry.input
 class CreatePropertyInput:
     title: str
@@ -33,6 +32,7 @@ class CreatePropertyInput:
     area: Optional[float] = None
     address: Optional[str] = None
     image_url: Optional[str] = None
+    agent_phone: Optional[str] = None
 
 
 @strawberry.input
@@ -48,6 +48,7 @@ class UpdatePropertyInput:
     area: Optional[float] = None
     address: Optional[str] = None
     image_url: Optional[str] = None
+    agent_phone: Optional[str] = None
 
 # @strawberry.type
 # class Agents:

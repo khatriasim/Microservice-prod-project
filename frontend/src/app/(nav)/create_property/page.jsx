@@ -39,6 +39,7 @@ mutation CreateProperty($input: CreatePropertyInput!) {
     status
     agentId
     agentName
+    agentPhone
     description
     bedrooms
     bathrooms
@@ -63,8 +64,8 @@ export default function CreatePropertyPage() {
   const [formData, setFormData] = useState({
     title: "",
     price: "",
-    city: "",
-    propertyType: "",
+    agentPhone: "",
+    city: "",    propertyType: "",
     description: "",
     bedrooms: "",
     bathrooms: "",
@@ -186,6 +187,7 @@ export default function CreatePropertyPage() {
         bathrooms: Number(formData.bathrooms),
         area: Number(formData.area),
         address: formData.address.trim(),
+        agent_phone: formData.agentPhone ? formData.agentPhone.trim() : null,
         imageUrl: images.length > 0 ? images[0] : null,
       },
     };
@@ -331,52 +333,52 @@ export default function CreatePropertyPage() {
                 {errors.title && <p className={errorClass}><AlertCircle size={14} />{errors.title}</p>}
               </div>
 
-              {/* Price */}
+              {/* Phone no + Price row */}
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-  <label htmlFor="price" className={labelClass}>
-    <span className="flex items-center gap-2">
-      <span className="text-xs font-bold text-slate-400">Rs.</span>
-      Price
-    </span>
-  </label>
-  <div className="relative">
-    <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-400">
-      Rs.
-    </span>
-    <input
-      type="text"
-      id="price"
-      name="price"
-      value={formData.price}
-      onChange={handleChange}
-      placeholder="e.g. 5000000 or 5 Crore"
-      className={`${inputClass} pl-10 ${errors.price ? "border-red-300 focus:border-red-500" : ""}`}
-      disabled={submitting}
-    />
-  </div>
-  {errors.price && <p className={errorClass}><AlertCircle size={14} />{errors.price}</p>}
-</div>
-
-              {/* Status */}
-              {/* <div>
-                <label className={labelClass}>Status</label>
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setFormData((prev) => ({ ...prev, status: "available" }))}
-                    className={`rounded-xl px-5 py-2.5 text-sm font-semibold border transition ${formData.status === "available" ? "bg-emerald-50 border-emerald-300 text-emerald-700 shadow-sm" : "bg-white border-slate-200 text-slate-500 hover:border-slate-300"}`}
-                  >
-                    Available
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFormData((prev) => ({ ...prev, status: "sold" }))}
-                    className={`rounded-xl px-5 py-2.5 text-sm font-semibold border transition ${formData.status === "sold" ? "bg-amber-50 border-amber-300 text-amber-700 shadow-sm" : "bg-white border-slate-200 text-slate-500 hover:border-slate-300"}`}
-                  >
-                    Sold
-                  </button>
+                  <label htmlFor="agentPhone" className={labelClass}>
+                    <span className="flex items-center gap-2">
+                      Phone no
+                    </span>
+                  </label>
+                  <input
+                    type="text"
+                    id="agentPhone"
+                    name="agentPhone"
+                    value={formData.agentPhone}
+                    onChange={handleChange}
+                    placeholder="e.g. 9841234567"
+                    className={`${inputClass} ${errors.agentPhone ? "border-red-300 focus:border-red-500" : ""}`}
+                    disabled={submitting}
+                  />
+                  {errors.agentPhone && <p className={errorClass}><AlertCircle size={14} />{errors.agentPhone}</p>}
                 </div>
-              </div> */}
+
+                <div>
+                  <label htmlFor="price" className={labelClass}>
+                    <span className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-slate-400">Rs.</span>
+                      Price
+                    </span>
+                  </label>
+                  <div className="relative">
+                    <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-400">
+                      Rs.
+                    </span>
+                    <input
+                      type="text"
+                      id="price"
+                      name="price"
+                      value={formData.price}
+                      onChange={handleChange}
+                      placeholder="e.g. 5000000 or 5 Crore"
+                      className={`${inputClass} pl-10 ${errors.price ? "border-red-300 focus:border-red-500" : ""}`}
+                      disabled={submitting}
+                    />
+                  </div>
+                  {errors.price && <p className={errorClass}><AlertCircle size={14} />{errors.price}</p>}
+                </div>
+              </div>
 
               {/* City & Property Type - side by side */}
               <div className="grid gap-4 sm:grid-cols-2">

@@ -34,6 +34,7 @@ class PropertyMutation:
                 status="available",
                 agent_name=user_name,
                 agent_email=user_email,
+                agent_phone=input.agent_phone,
                 image_url = input.image_url
             )
 
@@ -50,7 +51,8 @@ class PropertyMutation:
                     "property_type": new_property.property_type,
                     "agent_id": new_property.agent_user_id,
                     "agent_name": user_name,
-                    "agent_email": user_email
+                    "agent_email": user_email,
+                    "agent_phone": new_property.agent_phone
                  })
             )
 
@@ -69,6 +71,7 @@ class PropertyMutation:
                 address=new_property.address,
                 property_type = new_property.property_type,
                 image_url=new_property.image_url,
+                agent_phone=new_property.agent_phone,
             )
         finally:
             db.close()
@@ -98,6 +101,7 @@ class PropertyMutation:
             if input.address is not None: prop.address = input.address
             if input.property_type is not None: prop.property_type = input.property_type
             if input.image_url is not None: prop.image_url = input.image_url
+            if input.agent_phone is not None: prop.agent_phone = input.agent_phone
 
             db.commit()
             db.refresh(prop)
@@ -115,8 +119,9 @@ class PropertyMutation:
                 area=prop.area,
                 address=prop.address,
                 agent_name=prop.agent_name,
+                agent_phone=prop.agent_phone,
                 image_url=prop.image_url,
-        )
+            )
         finally:
             db.close()
 

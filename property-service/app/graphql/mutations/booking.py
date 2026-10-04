@@ -4,6 +4,7 @@ from app.graphql.types.booking import BookingType, CreateBookingInput
 from app.core.database import SessionLocal
 from app.models.booking import Booking
 from app.models.property import Property
+from app.models.user import User
 from datetime import datetime
 from typing import Optional
 
@@ -35,13 +36,14 @@ class BookingMutation:
                     booking_date=str(existing.booking_date),
                     status=existing.status,
                     property_title=existing.property.title if existing.property else None,
-                    buyer_name=None,
+                    buyer_name=existing.booker_name or existing.buyer_id,
                 )
 
             new_booking = Booking(
                 property_id=input.property_id,
                 buyer_id=int(user_id),
-                booking_date=datetime.strptime(input.booking_date, "%Y-%m-%d"),
+                booker_name=info.context.get("user_name") or info.context.get("user_email") or "Unknown",
+                booking_date=datetime.now(),
                 status="pending",
             )
 
@@ -56,7 +58,7 @@ class BookingMutation:
                 booking_date=str(new_booking.booking_date),
                 status=new_booking.status,
                 property_title=new_booking.property.title,
-                buyer_name=None,  # no local user table anymore — see note below
+                buyer_name=new_booking.booker_name or new_booking.buyer_id,
             )
         finally:
             db.close()
@@ -108,7 +110,7 @@ class BookingMutation:
                 booking_date=str(booking.booking_date),
                 status=booking.status,
                 property_title=booking.property.title,
-                buyer_name=None,  # no local user table anymore — see note below
+                buyer_name=booking.booker_name or booking.buyer_id,
             )
         finally:
             db.close()

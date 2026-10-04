@@ -144,6 +144,7 @@ class PropertyQuery:
                     agent_id=p.agent_user_id,
                     agent_name=p.agent_name,
                     agent_email=p.agent_email,
+                    agent_phone=p.agent_phone,
                     description=p.description,
                     bedrooms=p.bedrooms,
                     bathrooms=p.bathrooms,
@@ -175,6 +176,7 @@ class PropertyQuery:
                 agent_id=prop.agent_user_id,
                 agent_name=prop.agent_name,
                 agent_email=prop.agent_email,
+                agent_phone=prop.agent_phone,
                 description=prop.description,
                 bedrooms=prop.bedrooms,
                 bathrooms=prop.bathrooms,
@@ -182,7 +184,6 @@ class PropertyQuery:
                 address=prop.address,
                 property_type=prop.property_type,
                 image_url=prop.image_url,
-                agent_phone=prop.agent_phone,
             )
         finally:
             db.close()      
@@ -216,6 +217,7 @@ def _to_property_types(props):
                 agent_id=p.agent_user_id,
                 agent_name=p.agent_name,
                 agent_email=p.agent_email,
+                agent_phone=p.agent_phone,
                 description=p.description,
                 bedrooms=p.bedrooms,
                 bathrooms=p.bathrooms,
