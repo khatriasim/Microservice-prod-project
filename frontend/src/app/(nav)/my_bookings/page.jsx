@@ -4,9 +4,24 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
-import { Home, ArrowLeft, Loader2, AlertCircle, Calendar, Building2 } from "lucide-react";
+import { Home, ArrowLeft, Loader2, AlertCircle, Calendar, Building2, Trash2, CheckCircle2 } from "lucide-react";
 
 const GRAPHQL_URL = "http://localhost/graphql";
+
+const CANCEL_BOOKING_MUTATION = `
+mutation CancelBooking($id: Int!) {
+  cancelBooking(id: $id)
+}
+`;
+
+const UPDATE_BOOKING_STATUS_MUTATION = `
+mutation UpdateBookingStatus($id: Int!, $status: String!) {
+  updateBookingStatus(id: $id, status: $status) {
+    id
+    status
+  }
+}
+`;
 
 const MY_BOOKINGS_QUERY = `
 query MyBookings {
@@ -28,6 +43,45 @@ export default function MyBookingsPage() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const [cancelingId, setCancelingId] = useState(null);
+  const [editingId, setEditingId] = useState(null);
+  const [editStatus, setEditStatus] = useState("");
+
+  async function handleCancel(id) {
+    setCancelingId(id);
+    try {
+      const res = await fetch(GRAPHQL_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ query: CANCEL_BOOKING_MUTATION, variables: { id } }),
+      });
+      const json = await res.json();
+      if (json.errors) throw new Error(json.errors[0]?.message || "Failed to cancel");
+      fetchBookings();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setCancelingId(null);
+    }
+  }
+
+  async function handleUpdate(id, status) {
+    try {
+      const res = await fetch(GRAPHQL_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ query: UPDATE_BOOKING_STATUS_MUTATION, variables: { id, status } }),
+      });
+      const json = await res.json();
+      if (json.errors) throw new Error(json.errors[0]?.message || "Failed to update");
+      fetchBookings();
+    } catch (err) {
+      setError(err.message);
+    }
+  }
 
   async function fetchBookings() {
     setLoading(true);
@@ -130,6 +184,20 @@ export default function MyBookingsPage() {
                     <div className="rounded-lg bg-slate-50 px-3 py-2"><span className="block text-xs text-slate-400">Booked for</span><span className="font-medium">{b.buyerName || "—"}</span></div>
                     <div className="rounded-lg bg-slate-50 px-3 py-2"><span className="block text-xs text-slate-400">Date</span><span className="font-medium">{b.bookingDate ? b.bookingDate.replace('T',' ').split('.')[0].slice(0,16) : "—"}</span></div>
                     <div className="rounded-lg bg-slate-50 px-3 py-2"><span className="block text-xs text-slate-400">Property ID</span><span className="font-medium">{b.propertyId || "—"}</span></div>
+                  </div>
+                  <div className="flex items-center gap-2 mt-3">
+                    <button onClick={() => handleCancel(b.id)} disabled={cancelingId === b.id} className="inline-flex items-center gap-1.5 rounded-lg bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-100 transition disabled:opacity-60">
+                      <Trash2 size={12} /> {cancelingId === b.id ? "Canceling…" : "Cancel"}
+                    </button>
+                    {editingId === b.id ? (
+                      <div className="flex items-center gap-2">
+                        <button onClick={() => handleUpdate(b.id, "confirmed")} className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition"><CheckCircle2 size={12}/> Confirmed</button>
+                        <button onClick={() => handleUpdate(b.id, "pending")} className="inline-flex items-center gap-1 rounded-lg bg-amber-50 px-2 py-1 text-xs font-semibold text-amber-600 hover:bg-amber-100 transition"><Loader2 size={12}/> Pending</button>
+                        <button onClick={() => setEditingId(null)} className="text-xs text-slate-500 hover:text-slate-700">Close</button>
+                      </div>
+                    ) : (
+                      <button onClick={() => { setEditingId(b.id); setEditStatus(b.status); }} className="inline-flex items-center gap-1 rounded-lg bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-100 transition">Edit</button>
+                    )}
                   </div>
                 </div>
               ))}
