@@ -378,7 +378,7 @@ export default function AgentPropPage() {
                         <ul className="space-y-2">
                           {bookings.map((b, idx) => (
                             <li key={b.id ?? idx} className="text-sm text-slate-700 bg-white rounded-lg px-3 py-2 border border-indigo-100 shadow-sm">
-                              <span className="font-medium">User:</span> {b.buyerName || b.buyerId || "—"} · <span className="font-medium">Status:</span> {b.status} · <span className="font-medium">Date:</span> {b.bookingDate || "—"}
+                              <span className="font-medium">User:</span> {b.buyerName || b.buyerId || "—"} · <span className="font-medium">Status:</span> {b.status} · <span className="font-medium">Date:</span> {b.bookingDate ? b.bookingDate.replace('T',' ').split('.')[0].slice(0,16) : "—"}
                             </li>
                           ))}
                         </ul>
