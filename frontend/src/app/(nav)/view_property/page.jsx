@@ -509,30 +509,22 @@ function ViewPropertyContent() {
                 <span className="grid h-10 w-10 place-items-center rounded-full bg-dark-green/10 text-dark-green">
                   <User size={18} />
                 </span>
-                <div className="min-w-0 grid grid-cols-3 gap-2 items-start">
+                <div className="flex min-w-0 flex-1 items-center gap-4">
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-slate-900 leading-tight">
-                      {property.agentName}
-                    </p>
-                    <p className="truncate text-xs text-slate-500 leading-tight">
-                      {property.agentEmail || "Listing agent"}
-                    </p>
+                    <p className="text-base font-semibold text-slate-900 leading-tight">{property.agentName}</p>
+                    <p className="truncate text-xs text-slate-500 leading-tight">{property.agentEmail || "Listing agent"}</p>
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[10px] text-slate-900 leading-tight">Phone no</p>
-                    <p className="text-sm text-slate-900 leading-tight">{property.agentPhone || "+977 9801234567"}</p>
+                    <p className="text-[10px] font-medium text-slate-400 leading-tight">Phone no</p>
+                    <p className="text-sm font-medium text-slate-900 leading-tight">{property.agentPhone || "+977 9801234567"}</p>
                   </div>
-                  <div className="min-w-0 text-right">
-                    <a href={`https://wa.me/${(property.agentPhone || "9779801234567").replace(/\D/g,"")}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 hover:text-emerald-700 transition">
-                      Chat with Agent
-                    </a>
-                    <div className="flex items-center justify-end gap-1 mt-0.5">
-                      <span className="grid h-4 w-4 place-items-center rounded-full bg-emerald-600 text-white">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-                      </span>
-                      <span className="text-[10px] text-slate-400">WhatsApp</span>
-                    </div>
-                  </div>
+                  <a href={`https://wa.me/${(property.agentPhone || "9779801234567").replace(/\D/g,"")}`} target="_blank" rel="noopener noreferrer" className="ml-auto inline-flex items-center gap-2 rounded-xl bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 transition shadow-sm cursor-pointer">
+                    <span>Chat with Agent</span>
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-600 text-white shadow">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                    </span>
+                    <span className="text-[10px] font-medium text-emerald-600">WhatsApp</span>
+                  </a>
                 </div>
               </div>
             )}
