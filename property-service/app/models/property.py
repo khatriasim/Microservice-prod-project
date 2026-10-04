@@ -21,4 +21,4 @@ class Property(Base):
     bookings = relationship("Booking", back_populates="property")
     agent_name = Column(String, nullable=True)
     agent_email = Column(String, nullable=True)
-    image_url = Column(String, nullable=True) 
+    image_url = Column(String, nullable=True)
