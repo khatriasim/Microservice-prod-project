@@ -7,3 +7,4 @@ class FavoriteType:
     property_id: int
     user_id: int
     property_title: Optional[str] = None
+    image_url: Optional[str] = None

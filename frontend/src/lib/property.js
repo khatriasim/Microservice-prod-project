@@ -18,6 +18,13 @@ export function getPhotoUrl(id) {
   return photoId;
 }
 
+export function resolveImageUrl(property) {
+  if (!property) return getPhotoUrl(1);
+  return property.imageUrl
+    ? `http://localhost${property.imageUrl}`
+    : getPhotoUrl(property.id);
+}
+
 export function formatPrice(price) {
   if (price == null) return "Price on request";
 

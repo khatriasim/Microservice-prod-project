@@ -310,7 +310,7 @@ function Header({ user, loading, logout, favCount }) {
           <a href={"/agents"} className="text-gray-600 hover:text-dark-green transition-colors">
             Agents
           </a>
-          <a href="#" className="text-gray-600 hover:text-dark-green transition-colors">
+          <a href={"/blog"} className="text-gray-600 hover:text-dark-green transition-colors">
             Blog
           </a>
         </nav>

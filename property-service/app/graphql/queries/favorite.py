@@ -23,6 +23,7 @@ class FavoriteQuery:
                     property_id=f.property_id,
                     user_id=f.user_id,
                     property_title=f.property.title if f.property else None,
+                    image_url=f.property.image_url if f.property else None,
                 )
                 for f in favorites
             ]

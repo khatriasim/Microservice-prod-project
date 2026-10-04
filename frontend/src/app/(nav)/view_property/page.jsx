@@ -410,14 +410,15 @@ function ViewPropertyContent() {
         <div className="grid gap-8 lg:grid-cols-[1.1fr_1fr]">
           {/* image */}
           <div className="relative aspect-16/10 w-full overflow-hidden rounded-3xl shadow-lg">
-            <Image
-              src={getPropertyImageUrl(property.imageUrl, property.id)}
-              alt={property.title || "Property"}
-              fill
-              priority
-              sizes="(max-width: 1024px) 100vw, 55vw"
-              className="object-cover"
-            />
+ <Image
+    src={getPropertyImageUrl(property.imageUrl, property.id)}
+    alt={property.title || "Property"}
+    width={800}
+    height={600}
+    priority
+    sizes="(max-width: 1024px) 100vw, 55vw"
+    className="w-full h-auto object-cover"
+  />
             <span
               className={`absolute top-4 left-4 inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide border ${status.bg} ${status.text} ${status.border}`}
             >

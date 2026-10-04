@@ -7,6 +7,7 @@ import { Heart, Home, AlertCircle, ArrowRight, MapPin, UserPlus } from "lucide-r
 import { SiteHeader } from "@/components/SiteHeader";
 import { useAuth } from "@/hooks/useAuth";
 import { getPhotoUrl } from "@/lib/property";
+import { resolveImageUrl } from "@/lib/property";
 
 const API_URL = "http://localhost/graphql";
 const MY_FAVORITES_QUERY = `
@@ -16,6 +17,7 @@ query {
     propertyId
     userId
     propertyTitle
+    imageUrl
   }
 }`;
 const TOGGLE_FAVOURITE_MUTATION = `
@@ -47,6 +49,7 @@ export default function FavouritesPage() {
   useEffect(() => {
     if (authLoading) return; // wait for the auth check to settle
     if (!user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(false);
       return;
     }
@@ -208,13 +211,13 @@ export default function FavouritesPage() {
               >
                 {/* Image */}
                 <div className="relative aspect-16/10 w-full overflow-hidden">
-                  <Image
-                    src={getPhotoUrl(fav.propertyId)}
-                    alt={fav.propertyTitle || "Saved property"}
-                    fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                  />
+                 <Image
+    src={resolveImageUrl({ id: fav.propertyId, imageUrl: fav.imageUrl })}
+    alt={fav.propertyTitle || "Saved property"}
+    fill
+    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+    className="object-contain transition-transform duration-500 group-hover:scale-[1.03]"
+  />
                   {/* Favorite toggle — same as view_estate */}
                   <button
                     type="button"
