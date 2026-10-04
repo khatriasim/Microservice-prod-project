@@ -17,6 +17,7 @@ class PropertyType:
     property_type: Optional[str] = None
     agent_email : Optional[str] = None
     image_url: Optional[str] = None
+    agent_phone: Optional[str] = None
 
 
 

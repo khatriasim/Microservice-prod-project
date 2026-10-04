@@ -22,3 +22,4 @@ class Property(Base):
     agent_name = Column(String, nullable=True)
     agent_email = Column(String, nullable=True)
     image_url = Column(String, nullable=True)
+    agent_phone = Column(String, nullable=True)

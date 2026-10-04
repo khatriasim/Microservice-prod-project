@@ -182,6 +182,7 @@ class PropertyQuery:
                 address=prop.address,
                 property_type=prop.property_type,
                 image_url=prop.image_url,
+                agent_phone=prop.agent_phone,
             )
         finally:
             db.close()      

@@ -43,6 +43,7 @@ query ViewProperty($id: Int!) {
     agentId
     agentName
     agentEmail
+    agentPhone
     description
     bedrooms
     bathrooms
@@ -519,10 +520,10 @@ function ViewPropertyContent() {
                   </div>
                   <div className="min-w-0">
                     <p className="text-[10px] text-slate-900 leading-tight">Phone no</p>
-                    <p className="text-sm text-slate-900 leading-tight">+977 9801234567</p>
+                    <p className="text-sm text-slate-900 leading-tight">{property.agentPhone || "+977 9801234567"}</p>
                   </div>
                   <div className="min-w-0 text-right">
-                    <a href="https://wa.me/9779801234567" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 hover:text-emerald-700 transition">
+                    <a href={`https://wa.me/${(property.agentPhone || "9779801234567").replace(/\D/g,"")}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 hover:text-emerald-700 transition">
                       Chat with Agent
                     </a>
                     <div className="flex items-center justify-end gap-1 mt-0.5">

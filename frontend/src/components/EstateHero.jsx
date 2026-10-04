@@ -258,17 +258,16 @@ function DesktopHero() {
         className="absolute top-[50px] right-12 z-10 w-[clamp(120px,10vw,177px)] group animate-slide-in-right delay-700"
       >
         <div className="relative rounded-2xl overflow-hidden shadow-xl shadow-dark-green/10 group-hover:shadow-2xl transition-shadow aspect-177/287">
-          <Image
-            src={IMAGES.video}
-            alt="Property video tour"
-            fill
-            sizes="(max-width: 1024px) 120px, 177px"
-            className="object-cover group-hover:scale-[1.02] transition-transform duration-700"
-          />
+         <video
+  src="/property-tour.mp4"
+  autoPlay
+  loop
+  muted
+  playsInline
+  className="absolute inset-0 w-full h-full object-cover"
+/>
           <div className="absolute inset-0 bg-dark-green/10 group-hover:bg-dark-green/20 transition-colors" />
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 h-11 w-11 rounded-full bg-dark-green text-white flex items-center justify-center shadow-lg group-hover:bg-dark-green-hover transition-colors">
-            <Play className="w-5 h-5 fill-current ml-0.5" />
-          </div>
+         
         </div>
         <div className="mt-3 text-center">
           <p className="text-[clamp(10px,0.9vw,13px)] text-gray-600">
@@ -413,9 +412,6 @@ function TabletHero() {
             className="object-cover group-hover:scale-[1.02] transition-transform duration-700"
           />
           <div className="absolute inset-0 bg-dark-green/10 group-hover:bg-dark-green/20 transition-colors" />
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 h-10 w-10 rounded-full bg-dark-green text-white flex items-center justify-center shadow-lg group-hover:bg-dark-green-hover transition-colors">
-            <Play className="w-4 h-4 fill-current ml-0.5" />
-          </div>
         </div>
         <p className="mt-2 text-center text-[11px] text-gray-600">
           Virtual Property Tours
