@@ -23,6 +23,7 @@ async def register(user : UserCreate, db: Session = Depends(get_db), redis : Red
         name=user.name,
         email = user.email,
         age=user.age,
+        phone=user.phone,
         hashed_password=hash_password(user.password)
     )
     db.add(db_user)
@@ -40,8 +41,8 @@ async def login(credentials: LoginRequest, response: Response, db: Session = Dep
     if not user or not verify_password(credentials.password, user.hashed_password):
         raise HTTPException(status_code = 401, detail="Invalid email or password")
     
-    access_token = create_access_token(data={"sub":str(user.id)})
-    refresh_token = create_refresh_token(data={"sub": str(user.id)})
+    access_token = create_access_token(data={"sub":str(user.id), "phone": user.phone})
+    refresh_token = create_refresh_token(data={"sub": str(user.id), "phone": user.phone})
 
     response.set_cookie(
         key="access_token",
@@ -87,8 +88,8 @@ async def refresh_token(request: Request, response: Response, db: Session = Depe
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
     
-    new_access_token = create_access_token(data={"sub": str(user.id)})
-    new_refresh_token = create_refresh_token(data={"sub": str(user.id)})
+    new_access_token = create_access_token(data={"sub": str(user.id), "phone": user.phone})
+    new_refresh_token = create_refresh_token(data={"sub": str(user.id), "phone": user.phone})
 
     response.set_cookie(
         key="access_token",
