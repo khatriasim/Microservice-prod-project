@@ -64,6 +64,7 @@ query {
     bookingDate
     status
     propertyTitle
+    buyerName
   }
 }`;
 
