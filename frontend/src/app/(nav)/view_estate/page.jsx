@@ -21,6 +21,7 @@ import {
   ChevronDown,
   Plus,
   Building,
+  CalendarDays,
 } from "lucide-react";
 import { getPhotoUrl, getPropertyImageUrl } from "@/lib/property";
 
@@ -649,6 +650,15 @@ export default function ViewEstatePage() {
                   Browse our curated collection of homes, apartments, and land
                 </p>
               </div>
+              {!loading && user && (
+                <Link
+                  href="/my_bookings"
+                  className="inline-flex h-9 items-center gap-2 rounded-full bg-indigo-50 px-4 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 transition border border-indigo-100 shadow-sm"
+                >
+                  <CalendarDays size={15} />
+                  My Bookings
+                </Link>
+              )}
               {!loading && (
                 <span className="inline-flex h-8 items-center rounded-full bg-dark-green/10 px-3.5 text-sm font-semibold text-dark-green">
                   {resultCount === totalCount
