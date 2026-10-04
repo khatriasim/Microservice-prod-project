@@ -364,7 +364,7 @@ export default function AgentPropPage() {
                         }}
                         className="inline-flex items-center gap-2 rounded-xl bg-indigo-50 px-3 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-100 transition"
                       >
-                        <Eye size={14} /> View Bookings
+                        <Eye size={14} /> View Bookings{bookings.filter(b => b.propertyId === p.id).length > 0 ? ` (${bookings.filter(b => b.propertyId === p.id).length})` : ''}
                       </button>
                     </div>
                   )}
