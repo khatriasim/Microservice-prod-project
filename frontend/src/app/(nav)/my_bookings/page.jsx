@@ -203,7 +203,7 @@ export default function MyBookingsPage() {
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm text-slate-600">
                     <div className="rounded-lg bg-slate-50 px-3 py-2"><span className="block text-xs text-slate-400">Booked for</span><span className="font-medium">{b.buyerName || "—"}</span></div>
-                    <div className="rounded-lg bg-slate-50 px-3 py-2"><span className="block text-xs text-slate-400">Date</span><span className="font-medium">{b.bookingDate ? b.bookingDate.replace('T',' ').split('.')[0].slice(0,16) : "—"}</span></div>
+                    <div className="rounded-lg bg-slate-50 px-3 py-2"><span className="block text-xs text-slate-400">Date</span><span className="font-medium">{formatBookingDate(b.bookingDate)}</span></div>
                     <div className="rounded-lg bg-slate-50 px-3 py-2"><span className="block text-xs text-slate-400">Property ID</span><span className="font-medium">{b.propertyId || "—"}</span></div>
                   </div>
                   <div className="flex items-center gap-2 mt-3">
