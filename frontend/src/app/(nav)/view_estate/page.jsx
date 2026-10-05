@@ -674,7 +674,7 @@ export default function ViewEstatePage() {
 
         {/* ---- search (city + bedrooms) ---- */}
         <section className="w-full border-b border-slate-100 bg-white/40">
-          <div className="mx-auto max-w-7xl px-5 py-8 lg:px-8 lg:py-5">
+          <div className="mx-auto max-w-7xl px-5 py-8 lg:px-8 lg:py-2">
             <header className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-2.5">
                 <span className="grid h-10 w-10 place-items-center rounded-xl bg-dark-green/10 text-dark-green">

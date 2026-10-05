@@ -19,6 +19,23 @@ import {
 
 const GRAPHQL_URL = "http://localhost/graphql";
 
+function formatBookingDate(dateStr) {
+  if (!dateStr) return "—";
+  const clean = dateStr.replace('T', ' ').split('.')[0];
+  const d = new Date(clean);
+  if (isNaN(d.getTime())) return clean;
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const year = d.getFullYear();
+  let hours = d.getHours();
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12;
+  const hourStr = String(hours).padStart(2, '0');
+  return `${month}/${day}/${year}, ${hourStr}:${minutes} ${ampm}`;
+}
+
 const AGENT_PROPERTIES_QUERY = `
 query AgentProperties {
   properties {
@@ -378,7 +395,7 @@ export default function AgentPropPage() {
                         <ul className="space-y-2">
                           {bookings.map((b, idx) => (
                             <li key={b.id ?? idx} className="text-sm text-slate-700 bg-white rounded-lg px-3 py-2 border border-indigo-100 shadow-sm">
-                              <span className="font-medium">User:</span> {b.buyerName || b.buyerId || "—"} · <span className="font-medium">Status:</span> {b.status} · <span className="font-medium">Date:</span> {b.bookingDate ? b.bookingDate.replace('T',' ').split('.')[0].slice(0,16) : "—"}
+                              <span className="font-medium">User:</span> {b.buyerName || b.buyerId || "—"} · <span className="font-medium">Status:</span> {b.status} · <span className="font-medium">Date:</span> {b.bookingDate ? formatBookingDate(b.bookingDate) : "—"}
                             </li>
                           ))}
                         </ul>
