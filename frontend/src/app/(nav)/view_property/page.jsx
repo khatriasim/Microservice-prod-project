@@ -597,7 +597,7 @@ function ViewPropertyContent() {
                   </span>
                   <div>
                     <p className="text-sm font-semibold text-dark-green">
-                      Viewing booked for {booking.bookingDate}
+                      Viewing booked for {formatBookingDate(booking.bookingDate)}
                     </p>
                     <p className="text-xs text-slate-500">
                       Status:{" "}
@@ -691,6 +691,23 @@ function ViewPropertyContent() {
 }
 
 /* =================== PAGE =================== */
+function formatBookingDate(dateStr) {
+  if (!dateStr) return "—";
+  const clean = dateStr.replace('T', ' ').split('.')[0];
+  const d = new Date(clean);
+  if (isNaN(d.getTime())) return clean;
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const year = d.getFullYear();
+  let hours = d.getHours();
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12;
+  const hourStr = String(hours).padStart(2, '0');
+  return `${month}/${day}/${year}, ${hourStr}:${minutes} ${ampm}`;
+}
+
 export default function ViewPropertyPage() {
   return (
     <Suspense fallback={<PageFallback />}>
