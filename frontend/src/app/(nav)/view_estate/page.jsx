@@ -650,29 +650,31 @@ export default function ViewEstatePage() {
                   Browse our curated collection of homes, apartments, and land
                 </p>
               </div>
-              {!loading && user && (
-                <Link
-                  href="/my_bookings"
-                  className="inline-flex h-9 items-center gap-2 rounded-full bg-indigo-50 px-4 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 transition border border-indigo-100 shadow-sm"
-                >
-                  <CalendarDays size={15} />
-                  My Bookings
-                </Link>
-              )}
-              {!loading && (
-                <span className="inline-flex h-8 items-center rounded-full bg-dark-green/10 px-3.5 text-sm font-semibold text-dark-green">
-                  {resultCount === totalCount
-                    ? `${totalCount} properties`
-                    : `${resultCount} of ${totalCount}`}
-                </span>
-              )}
+              <div className="flex items-center gap-3 flex-wrap">
+                {!loading && user && (
+                  <Link
+                    href="/my_bookings"
+                    className="inline-flex h-9 items-center gap-2 rounded-full bg-indigo-50 px-4 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 transition border border-indigo-100 shadow-sm"
+                  >
+                    <CalendarDays size={15} />
+                    My Bookings
+                  </Link>
+                )}
+                {!loading && (
+                  <span className="inline-flex h-8 items-center rounded-full bg-dark-green/10 px-3.5 text-sm font-semibold text-dark-green">
+                    {resultCount === totalCount
+                      ? `${totalCount} properties`
+                      : `${resultCount} of ${totalCount}`}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </section>
 
         {/* ---- search (city + bedrooms) ---- */}
         <section className="w-full border-b border-slate-100 bg-white/40">
-          <div className="mx-auto max-w-7xl px-5 py-8 lg:px-8 lg:py-0">
+          <div className="mx-auto max-w-7xl px-5 py-8 lg:px-8 lg:py-5">
             <header className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-2.5">
                 <span className="grid h-10 w-10 place-items-center rounded-xl bg-dark-green/10 text-dark-green">
