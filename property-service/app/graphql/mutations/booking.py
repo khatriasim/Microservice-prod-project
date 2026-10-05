@@ -97,7 +97,13 @@ class BookingMutation:
             if booking.buyer_id != int(user_id):
                 raise Exception("Not your booking")
             if booking_date is not None:
-                booking.booking_date = datetime.fromisoformat(booking_date.replace("Z", "+00:00")) if "Z" in booking_date else datetime.fromisoformat(booking_date)
+                booking_date = booking_date.strip()
+                if booking_date:
+                    # accept "YYYY-MM-DDTHH:MM" from datetime-local input
+                    try:
+                        booking.booking_date = datetime.fromisoformat(booking_date)
+                    except ValueError:
+                        raise Exception(f"Invalid date format: {booking_date}")
             db.commit()
             db.refresh(booking)
             return BookingType(

@@ -92,6 +92,8 @@ export default function MyBookingsPage() {
 
   async function handleUpdateDate(id) {
     if (!editDate) return;
+    // datetime-local gives "YYYY-MM-DDTHH:MM"
+    const iso = editDate.length === 16 ? editDate + ":00" : editDate;
     try {
       const res = await fetch(GRAPHQL_URL, {
         method: "POST",
