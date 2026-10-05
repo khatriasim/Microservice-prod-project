@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
 import { Home, ArrowLeft, Loader2, AlertCircle, Calendar, Building2, Trash2, PenSquare } from "lucide-react";
 
-const GRAPHQL_URL = "http://localhost/graphql";
+const GRAPHQL_URL = "http://localhost:8000/graphql";
 
 const CANCEL_BOOKING_MUTATION = `
 mutation CancelBooking($id: Int!) {
@@ -71,6 +71,23 @@ export default function MyBookingsPage() {
     if (!authLoading && user) fetchBookings();
   }, [authLoading, user]);
 
+  function formatBookingDate(dateStr) {
+    if (!dateStr) return "—";
+    const clean = dateStr.replace('T', ' ').split('.')[0];
+    const d = new Date(clean);
+    if (isNaN(d.getTime())) return clean;
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const year = d.getFullYear();
+    let hours = d.getHours();
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // 0 should be 12
+    const hourStr = String(hours).padStart(2, '0');
+    return `${month}/${day}/${year}, ${hourStr}:${minutes} ${ampm}`;
+  }
+
   async function handleCancel(id) {
     setCancelingId(id);
     try {
@@ -99,7 +116,7 @@ export default function MyBookingsPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ query: UPDATE_BOOKING_MUTATION, variables: { id, bookingDate: editDate } }),
+        body: JSON.stringify({ query: UPDATE_BOOKING_MUTATION, variables: { id, bookingDate: iso } }),
       });
       const json = await res.json();
       if (json.errors) throw new Error(json.errors[0]?.message || "Failed to update date");
