@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { Home, Heart } from "lucide-react";
+import { Home, Heart, Bell } from "lucide-react";
 import { AuthSection } from "@/components/AuthSection";
 
 /**
@@ -42,6 +42,16 @@ export function SiteHeader({ user, loading, logout, favCount = 0, active = "home
         </nav>
 
         <div className="flex items-center gap-3">
+          <Link
+            href="/notifications"
+            aria-label="Notifications"
+            className="relative flex h-10 w-10 rounded-full bg-dark-green items-center justify-center text-white shadow-md hover:bg-dark-green-hover transition-colors shrink-0"
+          >
+            <Bell className="w-5 h-5" strokeWidth={2} />
+            <span className="absolute -top-1 -right-1 min-h-5 min-w-5 rounded-full bg-red-500 border-2 border-background text-[10px] font-bold text-white flex items-center justify-center px-1">
+              2
+            </span>
+          </Link>
           <Link
             href="/favourite"
             aria-label="Saved homes"
