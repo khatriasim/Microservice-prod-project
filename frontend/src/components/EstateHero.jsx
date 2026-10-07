@@ -26,6 +26,7 @@ import {
   Plus,
   Search,
   Star,
+  Bell,
 } from "lucide-react";
 
 const GRAPHQL_URL = "http://localhost/graphql";
@@ -203,6 +204,14 @@ function Header({ user, loading, logout, favCount = 0 }) {
             </span>
           )}
         </a>
+
+        <button
+          aria-label="Notifications"
+          className="relative flex h-10 w-10 rounded-full bg-indigo-600 items-center justify-center text-white shadow-md hover:bg-indigo-700 transition-colors shrink-0"
+        >
+          <Bell className="w-5 h-5" strokeWidth={2} />
+          <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-amber-400 border-2 border-background" />
+        </button>
 
 
         <AuthSection user={user} loading={loading} logout={logout} />
