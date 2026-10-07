@@ -22,14 +22,13 @@ const GRAPHQL_URL = "http://localhost/graphql";
 
 function formatBookingDate(dateStr) {
   if (!dateStr) return "—";
-  const clean = dateStr.replace('T', ' ').split('.')[0];
-  const d = new Date(clean);
-  if (isNaN(d.getTime())) return clean;
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  const year = d.getFullYear();
-  let hours = d.getHours();
-  const minutes = String(d.getMinutes()).padStart(2, '0');
+  const match = String(dateStr).match(
+    /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/
+  );
+  if (!match) return dateStr;
+
+  const [, year, month, day, hour, minutes] = match;
+  let hours = Number(hour);
   const ampm = hours >= 12 ? 'PM' : 'AM';
   hours = hours % 12;
   hours = hours ? hours : 12;

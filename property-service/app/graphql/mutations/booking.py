@@ -23,6 +23,13 @@ class BookingMutation:
             if not prop:
                 raise ValueError("Property not found")
 
+            try:
+                # The client sends the values from the date and time controls
+                # as a local datetime, for example 2026-10-08T10:00.
+                booking_date_dt = datetime.fromisoformat(input.booking_date)
+            except (TypeError, ValueError):
+                raise ValueError("A valid booking date and time is required")
+
             # don't double-book — return the user's existing booking for this property
             existing = db.query(Booking).filter(
                 Booking.property_id == input.property_id,
@@ -33,14 +40,11 @@ class BookingMutation:
                     id=existing.id,
                     property_id=existing.property_id,
                     buyer_id=existing.buyer_id,
-                    booking_date=existing.booking_date.strftime("%Y-%m-%d %H:%M"),
+                    booking_date=existing.booking_date.strftime("%Y-%m-%dT%H:%M"),
                     status=existing.status,
                     property_title=existing.property.title if existing.property else None,
                     buyer_name=existing.booker_name or existing.buyer_id,
                 )
-
-            booking_date_str = input.booking_date if input.booking_date else None
-            booking_date_dt = datetime.fromisoformat(booking_date_str) if booking_date_str else datetime.now()
 
             new_booking = Booking(
                 property_id=input.property_id,
@@ -58,7 +62,7 @@ class BookingMutation:
                 id=new_booking.id,
                 property_id=new_booking.property_id,
                 buyer_id=new_booking.buyer_id,
-                booking_date=new_booking.booking_date.strftime("%Y-%m-%d %H:%M"),
+                booking_date=new_booking.booking_date.strftime("%Y-%m-%dT%H:%M"),
                 status=new_booking.status,
                 property_title=new_booking.property.title,
                 buyer_name=new_booking.booker_name or new_booking.buyer_id,
@@ -113,7 +117,7 @@ class BookingMutation:
                 id=booking.id,
                 property_id=booking.property_id,
                 buyer_id=booking.buyer_id,
-                booking_date=booking.booking_date.strftime("%Y-%m-%d %H:%M"),
+                booking_date=booking.booking_date.strftime("%Y-%m-%dT%H:%M"),
                 status=booking.status,
                 property_title=booking.property.title,
                 buyer_name=booking.booker_name or booking.buyer_id,
@@ -145,7 +149,7 @@ class BookingMutation:
                 id=booking.id,
                 property_id=booking.property_id,
                 buyer_id=booking.buyer_id,
-                booking_date=booking.booking_date.strftime("%Y-%m-%d %H:%M"),
+                booking_date=booking.booking_date.strftime("%Y-%m-%dT%H:%M"),
                 status=booking.status,
                 property_title=booking.property.title,
                 buyer_name=booking.booker_name or booking.buyer_id,

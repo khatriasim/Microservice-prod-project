@@ -22,7 +22,10 @@ class BookingQuery:
                     id=b.id,
                     property_id=b.property_id,
                     buyer_id=b.buyer_id,
-                    booking_date=str(b.booking_date),
+                    # A viewing is a local appointment. Return its fields in
+                    # the same stable format used by booking mutations rather
+                    # than relying on Python's database-specific ``str``.
+                    booking_date=b.booking_date.strftime("%Y-%m-%dT%H:%M"),
                     status=b.status,
                     property_title=b.property.title,
                     buyer_name=b.booker_name,  # the booker's entered name
@@ -52,7 +55,7 @@ class BookingQuery:
                     id=b.id,
                     property_id=b.property_id,
                     buyer_id=b.buyer_id,
-                    booking_date=str(b.booking_date),
+                    booking_date=b.booking_date.strftime("%Y-%m-%dT%H:%M"),
                     status=b.status,
                     property_title=b.property.title,
                     buyer_name=b.booker_name,  # the name the booker entered when booking

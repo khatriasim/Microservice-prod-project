@@ -73,14 +73,13 @@ export default function MyBookingsPage() {
 
   function formatBookingDate(dateStr) {
     if (!dateStr) return "—";
-    const clean = dateStr.replace('T', ' ').split('.')[0];
-    const d = new Date(clean);
-    if (isNaN(d.getTime())) return clean;
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    const year = d.getFullYear();
-    let hours = d.getHours();
-    const minutes = String(d.getMinutes()).padStart(2, '0');
+    const match = String(dateStr).match(
+      /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/
+    );
+    if (!match) return dateStr;
+
+    const [, year, month, day, hour, minutes] = match;
+    let hours = Number(hour);
     const ampm = hours >= 12 ? 'PM' : 'AM';
     hours = hours % 12;
     hours = hours ? hours : 12; // 0 should be 12
@@ -189,7 +188,7 @@ export default function MyBookingsPage() {
               <Calendar size={48} className="mx-auto text-slate-300 mb-4" />
               <h3 className="font-serif-display text-xl text-dark-green mb-2">No bookings yet</h3>
               <p className="text-sm text-slate-500">Browse listings to make your first booking.</p>
-              <Link href="/" className="inline-flex items-center gap-2 rounded-xl bg-orange px-6 py-3 text-sm font-semibold text-white shadow-md shadow-orange/20 hover:bg-orange-hover transition mt-6">
+              <Link href={"/view_estate"} className="inline-flex items-center gap-2 rounded-xl bg-orange px-6 py-3 text-sm font-semibold text-white shadow-md shadow-orange/20 hover:bg-orange-hover transition mt-6">
                 Browse Properties
               </Link>
             </div>
