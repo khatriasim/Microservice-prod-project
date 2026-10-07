@@ -50,9 +50,12 @@ services:
       - REDIS_URL=redis://redis-property:6379
       - JWT_SECRET=09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7
     depends_on:
-      - property-db
-      - kafka
-      - redis-property
+      property-db:
+        condition: service_started
+      kafka:
+        condition: service_started
+      redis-property:
+        condition: service_started
     networks:
       - microservices-network
     labels:
@@ -68,6 +71,7 @@ services:
       - "traefik.http.services.property.loadbalancer.server.port=8000"
     volumes:
       - property-uploads:/app/static/uploads
+    restart: unless-stopped
 
 
   property-db:
@@ -110,6 +114,7 @@ services:
 
   notification-service:
     build: ./notification-service
+    restart: unless-stopped
     ports:
       - "8001:8000"
     environment:
@@ -119,15 +124,22 @@ services:
       - DATABASE_URL=postgresql://django_user:password123@notification-db:5432/django_db
       - JWT_SECRET=09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7
     depends_on:
-      - kafka
-      - notification-db
-      - redis-notification
+      kafka:
+        condition: service_started
+      notification-db:
+        condition: service_started
+      redis-notification:
+        condition: service_started
     networks:
       - microservices-network
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.notification.rule=PathPrefix(`/api`)"
       - "traefik.http.routers.notification.middlewares=cors"
+      - "traefik.http.middlewares.cors.headers.accesscontrolallowmethods=GET,POST,OPTIONS"
+      - "traefik.http.middlewares.cors.headers.accesscontrolalloworiginlist=http://localhost:3000"
+      - "traefik.http.middlewares.cors.headers.accesscontrolallowheaders=Content-Type,Authorization"
+      - "traefik.http.middlewares.cors.headers.accesscontrolallowcredentials=true"
       - "traefik.http.services.notification.loadbalancer.server.port=8000"
   celery-worker:
     build: ./notification-service
