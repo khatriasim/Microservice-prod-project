@@ -129,6 +129,7 @@ function ViewPropertyContent() {
 
   const [favorites, setFavorites] = useState(() => new Set()); // set of saved propertyIds
   const [bookingDate, setBookingDate] = useState(tomorrowIso());
+  const [bookingTime, setBookingTime] = useState("10:00");
   const [bookingLoading, setBookingLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -235,7 +236,7 @@ function ViewPropertyContent() {
         credentials: "include",
         body: JSON.stringify({
           query: BOOK_VIEWING_MUTATION,
-          variables: { propertyId, bookingDate },
+          variables: { propertyId, bookingDate: `${bookingDate}T${bookingTime}` },
         }),
       });
       const json = await res.json();
@@ -645,6 +646,22 @@ function ViewPropertyContent() {
                   min={today}
                   value={bookingDate}
                   onChange={(e) => setBookingDate(e.target.value)}
+                  className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 shadow-sm outline-none transition focus:border-dark-green focus:ring-4 focus:ring-dark-green/10"
+                />
+              </div>
+              <div className="flex-1">
+                <label
+                  htmlFor="bookingTime"
+                  className="mb-1.5 block text-sm font-semibold text-dark-green"
+                >
+                  Preferred time
+                </label>
+                <input
+                  id="bookingTime"
+                  type="time"
+                  required
+                  value={bookingTime}
+                  onChange={(e) => setBookingTime(e.target.value)}
                   className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 shadow-sm outline-none transition focus:border-dark-green focus:ring-4 focus:ring-dark-green/10"
                 />
               </div>

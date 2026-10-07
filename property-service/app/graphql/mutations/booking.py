@@ -39,11 +39,14 @@ class BookingMutation:
                     buyer_name=existing.booker_name or existing.buyer_id,
                 )
 
+            booking_date_str = input.booking_date if input.booking_date else None
+            booking_date_dt = datetime.fromisoformat(booking_date_str) if booking_date_str else datetime.now()
+
             new_booking = Booking(
                 property_id=input.property_id,
                 buyer_id=int(user_id),
                 booker_name=info.context.get("user_name") or info.context.get("user_email") or "Unknown",
-                booking_date=datetime.now(),
+                booking_date=booking_date_dt,
                 status="pending",
             )
 
