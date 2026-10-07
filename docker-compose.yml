@@ -158,6 +158,7 @@ services:
 
   kafka-consumer:
     build: ./notification-service
+    restart: unless-stopped
     command: python manage.py consume_property_events
     environment:
       - PYTHONUNBUFFERED=1
@@ -165,9 +166,12 @@ services:
       - CELERY_BROKER_URL=redis://redis-notification:6379
       - DATABASE_URL=postgresql://django_user:password123@notification-db:5432/django_db
     depends_on:
-      - kafka
-      - redis-notification
-      - notification-db
+      kafka:
+        condition: service_started
+      redis-notification:
+        condition: service_started
+      notification-db:
+        condition: service_started
     networks:
       - microservices-network
 
