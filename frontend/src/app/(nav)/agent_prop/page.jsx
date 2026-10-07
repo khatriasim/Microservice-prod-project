@@ -15,6 +15,7 @@ import {
   Trash2,
   Building2,
   Eye,
+  ChevronDown,
 } from "lucide-react";
 
 const GRAPHQL_URL = "http://localhost/graphql";
@@ -90,6 +91,15 @@ query PropertyBookings($propertyId: Int!) {
 }
 `;
 
+const UPDATE_BOOKING_STATUS_MUTATION = `
+mutation UpdateBookingStatus($id: Int!, $status: String!) {
+  updateBookingStatus(id: $id, status: $status) {
+    id
+    status
+  }
+}
+`;
+
 const DELETE_PROPERTY_MUTATION = `
 mutation DeleteProperty($id: Int!) {
   deleteProperty(id: $id)
@@ -109,6 +119,7 @@ export default function AgentPropPage() {
   const [showBookingsId, setShowBookingsId] = useState(null);
   const [bookings, setBookings] = useState([]);
   const [submitting, setSubmitting] = useState(false);
+  const [statusChangingId, setStatusChangingId] = useState(null);
 
   async function fetchProperties() {
     setLoading(true);
@@ -216,6 +227,29 @@ export default function AgentPropPage() {
       setBookings(json.data?.propertyBookings || []);
     } catch (err) {
       setError(err.message);
+    }
+  };
+
+  const handleStatusChange = async (bookingId, newStatus) => {
+    setStatusChangingId(bookingId);
+    try {
+      const res = await fetch(GRAPHQL_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          query: UPDATE_BOOKING_STATUS_MUTATION,
+          variables: { id: bookingId, status: newStatus },
+        }),
+      });
+      const json = await res.json();
+      if (json.errors) throw new Error(json.errors[0]?.message || "Failed to update status");
+      // refresh bookings for current open property
+      if (showBookingsId != null) fetchBookings(showBookingsId);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setStatusChangingId(null);
     }
   };
 
@@ -394,8 +428,30 @@ export default function AgentPropPage() {
                       ) : (
                         <ul className="space-y-2">
                           {bookings.map((b, idx) => (
-                            <li key={b.id ?? idx} className="text-sm text-slate-700 bg-white rounded-lg px-3 py-2 border border-indigo-100 shadow-sm">
-                              <span className="font-medium">User:</span> {b.buyerName || b.buyerId || "—"} · <span className="font-medium">Status:</span> {b.status} · <span className="font-medium">Date:</span> {b.bookingDate ? formatBookingDate(b.bookingDate) : "—"}
+                            <li key={b.id ?? idx} className="text-sm text-slate-700 bg-white rounded-lg px-3 py-3 border border-indigo-100 shadow-sm">
+                              <div className="flex items-center justify-between gap-2 mb-1">
+                                <span><span className="font-medium">User:</span> {b.buyerName || b.buyerId || "—"} · <span className="font-medium">Status:</span> {b.status}</span>
+                                <div className="relative">
+                                  <select
+                                    className={`rounded-md text-xs font-bold px-3 py-1.5 pr-7 shadow-none cursor-pointer border-none outline-none focus:ring-0 focus:border-none transition ${
+                                      b.status === "pending" ? "bg-amber-600 text-amber-50" :
+                                      b.status === "confirmed" ? "bg-emerald-50 text-emerald-700" :
+                                      b.status === "cancelled" ? "bg-red-50 text-red-700" :
+                                      "bg-slate-50 text-slate-700"
+                                    }`}
+                                    value={b.status || "pending"}
+                                    onChange={(e) => handleStatusChange(b.id, e.target.value)}
+                                    disabled={statusChangingId === b.id}
+                                    style={{ WebkitAppearance: 'none', appearance: 'none', border: 'none', outline: 'none' }}
+                                  >
+                                    <option value="pending" className="bg-orange-50 text-orange-700">pending</option>
+                                    <option value="confirmed" className="bg-emerald-50 text-emerald-700">confirmed</option>
+                                    <option value="cancelled" className="bg-red-50 text-red-700">cancelled</option>
+                                  </select>
+                                  <ChevronDown size={12} className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-black" />
+                                </div>
+                              </div>
+                              <div><span className="font-medium">Date:</span> {b.bookingDate ? formatBookingDate(b.bookingDate) : "—"}</div>
                             </li>
                           ))}
                         </ul>

@@ -199,7 +199,7 @@ export default function MyBookingsPage() {
                 <div key={b.id ?? b.propertyId} className="rounded-2xl border border-slate-100 bg-white shadow-sm p-6">
                   <div className="flex items-start justify-between mb-3">
                     <h3 className="font-serif-display text-xl text-dark-green">{b.propertyTitle || "Property"}</h3>
-                    <span className={`inline-block text-xs font-semibold px-2.5 py-1 rounded-full ${b.status === "pending" ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700"}`}>{b.status}</span>
+                    <span className={`inline-block text-xs font-semibold px-2.5 py-1 rounded-full ${b.status === "pending" ? "bg-amber-600 text-amber-50" : b.status === "confirmed" ? "bg-emerald-600 text-emerald-50" : b.status === "cancelled" ? "bg-red-600 text-red-50" : "bg-slate-100 text-slate-700"}`}>{b.status}</span>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm text-slate-600">
                     <div className="rounded-lg bg-slate-50 px-3 py-2"><span className="block text-xs text-slate-400">Booked for</span><span className="font-medium">{b.buyerName || "—"}</span></div>
