@@ -3,3 +3,4 @@ from app.models.property import Property
 from app.models.booking import Booking
 from app.models.favorite import Favorite
 from app.models.search_log import SearchLog
+from app.models.notification import Notification
