@@ -234,6 +234,7 @@ function PropertyCard({ property, isFavorite, onToggleFavorite, isLoggedIn }) {
             <span className="inline-flex items-center gap-1">
               <Ruler size={14} className="text-slate-400" />
               {areaStr}
+              <span className="text-xs text-slate-400 ml-0.5">Aana</span>
             </span>
           )}
         </div>

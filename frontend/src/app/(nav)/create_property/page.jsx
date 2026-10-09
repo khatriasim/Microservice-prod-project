@@ -185,7 +185,7 @@ export default function CreatePropertyPage() {
         description: formData.description.trim(),
         bedrooms: Number(formData.bedrooms),
         bathrooms: Number(formData.bathrooms),
-        area: Number(formData.area),
+        area: formData.area ? parseFloat(formData.area) : null,
         address: formData.address.trim(),
         agentPhone: formData.agentPhone ? formData.agentPhone.trim() : null,
         imageUrl: images.length > 0 ? images[0] : null,
@@ -476,18 +476,19 @@ export default function CreatePropertyPage() {
                   <label htmlFor="area" className={labelClass}>
                     <span className="flex items-center gap-2">
                       <Ruler size={16} className="text-slate-400" />
-                      Area (sq ft)
+                      Aana
                     </span>
                   </label>
                   <input
                     type="number"
+                    step="any"
                     id="area"
                     name="area"
                     min="0"
                     max="100000"
                     value={formData.area}
                     onChange={handleChange}
-                    placeholder="e.g. 2500"
+                    placeholder="e.g. 4.5"
                     className={`${inputClass} ${errors.area ? "border-red-300 focus:border-red-500" : ""}`}
                     disabled={submitting}
                   />

@@ -489,7 +489,7 @@ function ViewPropertyContent() {
                 <p className="mt-1 text-lg font-bold text-slate-900">
                   {areaStr ?? "—"}
                 </p>
-                <p className="text-xs text-slate-500">Area</p>
+                <p className="text-xs text-slate-500">Aana</p>
               </div>
             </div>
 
