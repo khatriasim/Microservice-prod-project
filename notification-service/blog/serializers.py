@@ -13,6 +13,7 @@ class PostSerializer(serializers.ModelSerializer):
     categories = CategorySerializer(many=True, read_only=True)
     likes_count = serializers.SerializerMethodField()
     comments_count = serializers.SerializerMethodField()
+    is_following = serializers.SerializerMethodField()
     category_ids = serializers.PrimaryKeyRelatedField(
         many = True,
         queryset = Category.objects.all(),
@@ -28,6 +29,12 @@ class PostSerializer(serializers.ModelSerializer):
 
     def get_comments_count(self, obj):
         return Comment.objects.filter(post=obj).count()
+
+    def get_is_following(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return Follow.objects.filter(following=obj.author, follower=request.user).exists()
+        return False
     
     def create(self, validated_data):
         categories = validated_data.pop('categories', [])

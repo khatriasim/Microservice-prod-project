@@ -45,7 +45,7 @@ function PostCard({ post, user }) {
   const [likeLoading, setLikeLoading] = useState(false);
   const [likesCount, setLikesCount] = useState(post.likes_count ?? 0);
   const [followLoading, setFollowLoading] = useState(false);
-  const [isFollowing, setIsFollowing] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(post.is_following ?? false);
 
   // Restore liked state from localStorage once the user is known
   useEffect(() => {
@@ -124,7 +124,8 @@ function PostCard({ post, user }) {
                   credentials: "include",
                 });
                 if (res.ok) {
-                  setIsFollowing((prev) => !prev);
+                  const next = !isFollowing;
+                  setIsFollowing(next);
                 }
               } catch {
                 /* ignore */

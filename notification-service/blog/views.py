@@ -233,7 +233,7 @@ class ListPostsView(APIView):
 
         paginator = PostPagination()
         paginated_posts = paginator.paginate_queryset(posts, request)
-        serializer = PostSerializer(paginated_posts, many=True)
+        serializer = PostSerializer(paginated_posts, many=True, context={'request': request})
         data = paginator.get_paginated_response(serializer.data).data
         cache.set(cache_key, data, 300)
         return Response(data)
@@ -242,7 +242,7 @@ class ListPostsView(APIView):
 class AuthorPostsView(APIView):
     def get(self, request, username):
         posts = Post.objects.filter(author__username=username, status='published').order_by('-created_at')
-        serializer = PostSerializer(posts, many=True)
+        serializer = PostSerializer(posts, many=True, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -251,7 +251,7 @@ class MyPostView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request):
         posts = Post.objects.filter(author = request.user)
-        serializer = PostSerializer(posts, many=True)
+        serializer = PostSerializer(posts, many=True, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
     
 
@@ -395,7 +395,7 @@ class PostByCategoryView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
         posts = Post.objects.filter(categories=category, status='published')
-        serializer = PostSerializer(posts, many=True)
+        serializer = PostSerializer(posts, many=True, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
     
 @extend_schema(tags=['Blog'])
@@ -481,5 +481,5 @@ class PostDetailView(APIView):
         # if not cache.get(cache_key):
         #     # Post.objects.filter(id=pk).update(views=F('views') + 1)
         #     cache.set(cache_key, True, 3600)
-        serializer = PostSerializer(post, many=False)
+        serializer = PostSerializer(post, many=False, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
