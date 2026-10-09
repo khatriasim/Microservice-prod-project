@@ -45,9 +45,9 @@ export function formatPrice(price) {
 
 export function formatArea(area) {
   if (area == null) return null;
-  if (area >= 1e6) return `${(area / 1e6).toFixed(1)}M ft²`;
-  if (area >= 1e3) return `${(area / 1e3).toFixed(1)}K ft²`;
-  return `${Math.round(area).toLocaleString()} ft²`;
+  if (area >= 1e6) return `${(area / 1e6).toFixed(1)}M`;
+  if (area >= 1e3) return `${(area / 1e3).toFixed(1)}K `;
+  return `${Math.round(area).toLocaleString()} `;
 }
 
 export const STATUS_STYLES = {
