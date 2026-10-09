@@ -31,10 +31,8 @@ class PostSerializer(serializers.ModelSerializer):
         return Comment.objects.filter(post=obj).count()
 
     def get_is_following(self, obj):
-        request = self.context.get('request')
-        if request and request.user.is_authenticated:
-            return Follow.objects.filter(following=obj.author, follower=request.user).exists()
-        return False
+        following = self.context.get("following_usernames", set())
+        return obj.author.username in following
     
     def create(self, validated_data):
         categories = validated_data.pop('categories', [])
