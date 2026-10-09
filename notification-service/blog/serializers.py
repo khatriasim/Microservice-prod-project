@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Post, Comment, Category, Notification, Like
+from .models import Post, Comment, Category, Notification, Like, Follow
 from django.contrib.auth.models import User
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -52,7 +52,7 @@ class PostSerializer(serializers.ModelSerializer):
         return instance
     class Meta:
         model = Post
-        fields = ['id', 'title', 'content', 'author', 'status','views', 'created_at', 'categories', 'category_ids', 'updated_at', 'likes_count', 'comments_count']
+        fields = ['id', 'title', 'content', 'author', 'status','views', 'created_at', 'categories', 'category_ids', 'updated_at', 'likes_count', 'comments_count', 'is_following']
         read_only_fields = ['id', 'author', 'created_at', 'updated_at']
 
 

@@ -442,7 +442,7 @@ class FeedView(APIView):
     def get(self, request):
         following = Follow.objects.filter(follower=request.user).values_list('following', flat=True)
         posts = Post.objects.filter(author__in=following, status='published').order_by('-created_at')
-        serialzer = PostSerializer(posts , many=True)
+        serialzer = PostSerializer(posts , many=True, context={'request': request})
         return Response(serialzer.data, status=status.HTTP_200_OK)
     
 
