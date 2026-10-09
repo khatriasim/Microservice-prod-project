@@ -44,6 +44,8 @@ function PostCard({ post, user }) {
   const [liked, setLiked] = useState(false);
   const [likeLoading, setLikeLoading] = useState(false);
   const [likesCount, setLikesCount] = useState(post.likes_count ?? 0);
+  const [followLoading, setFollowLoading] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
 
   // Restore liked state from localStorage once the user is known
   useEffect(() => {
@@ -109,6 +111,33 @@ function PostCard({ post, user }) {
           {post.author?.[0] ?? "?"}
         </span>
         <span className="font-medium text-dark-green">{post.author}</span>
+        {!isMine && user && (
+          <button
+            onClick={async (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (followLoading) return;
+              setFollowLoading(true);
+              try {
+                const res = await fetch(`http://localhost/api/blog/follow/${post.author}/`, {
+                  method: "POST",
+                  credentials: "include",
+                });
+                if (res.ok) {
+                  setIsFollowing((prev) => !prev);
+                }
+              } catch {
+                /* ignore */
+              } finally {
+                setFollowLoading(false);
+              }
+            }}
+            disabled={followLoading}
+            className="inline-flex items-center gap-1 rounded-full bg-dark-green px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white hover:bg-dark-green-hover transition-colors disabled:opacity-50"
+          >
+            {isFollowing ? "Following" : "Follow"}
+          </button>
+        )}
         {isMine && (
           <span className="inline-flex items-center rounded-full bg-orange px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
             Your Post
