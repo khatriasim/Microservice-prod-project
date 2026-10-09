@@ -184,7 +184,7 @@ export default function LoginPage() {
         {/* === Left / brand panel (decorative, hidden on mobile) === */}
         <aside className="relative hidden w-[46%] max-w-[560px] overflow-hidden lg:block">
           <Image
-            src="/ChatGPT Image Sep 13, 2026, 05_05_49 PM.png"
+            src="/hero-villa.jpg"
             alt="Modern luxury home at dusk"
             fill
             priority
