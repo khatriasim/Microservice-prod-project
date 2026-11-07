@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package estatehub.user.v1;
+
+service UserService {
+  rpc GetUser(GetUserRequest) returns (GetUserResponse);
+}
+
+message GetUserRequest {
+  int64 user_id = 1;
+}
+
+message GetUserResponse {
+  int64 user_id = 1;
+  bool is_active = 2;
+  bool profile_exists = 3;
+  bool is_email_verified = 4;
+  bool is_agent = 5;
+}

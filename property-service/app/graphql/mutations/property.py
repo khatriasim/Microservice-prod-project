@@ -2,11 +2,17 @@ import strawberry
 from app.graphql.types.property import PropertyType, CreatePropertyInput, UpdatePropertyInput
 from app.core.database import  SessionLocal
 from app.models.property import Property
+from app.models.idempotency import IdempotencyKey
 from typing import Optional
 from strawberry.types import Info
 import asyncio
 from app.core.kafka import publish_property_created
+import uuid
+from app.services.idempotency import ( OPERATION_CREATE_PROPERTY, hash_input, find_existing_idempotency)
+from app.graphql.types.property_type import to_property_type
+from sqlalchemy.exc import IntegrityError
 
+background_tasks: set = set()
 @strawberry.type
 class PropertyMutation:
 
@@ -18,8 +24,32 @@ class PropertyMutation:
 
         if not user_id:
             raise Exception("Not authenticated")
+
+        user_id = int(user_id)
+
+        idempotency_Key = info.context.get("idpempotency_key")
+
+        if not idempotency_Key:
+             raise Exception(
+                  "Idempotency key header is required"
+             )
+
+        request_hash = hash_input(input)
         db = SessionLocal()
         try:
+
+            existing_property = (
+                 find_existing_idempotency(
+                      db=db,
+                      user_id=user_id,
+                      key=idempotency_Key,
+                      request_hash=request_hash,
+                 )
+            )
+            if existing_property:
+                 return to_property_type(
+                      existing_property
+                 )
             new_property = Property(
                 title=input.title,
                 price=input.price,
@@ -39,11 +69,51 @@ class PropertyMutation:
             )
 
             db.add(new_property)
-            db.commit()
+            db.flush()
+
+
+            idempotency_record = IdempotencyKey(
+                 user_id=user_id,
+                 operation=OPERATION_CREATE_PROPERTY,
+                 key = idempotency_Key,
+                 request_hash = request_hash,
+                 resource_id= new_property.id,
+            )
+            db.add(idempotency_record)
+
+            try:
+                 db.commit()
+
+            except IntegrityError:
+                 db.rollback()
+
+                 existing_property = (
+                      find_existing_idempotency(
+                           db=db,
+                           user_id=user_id,
+                           key=idempotency_Key,
+                           request_hash=request_hash,
+                      )
+                 )
+
+                 if existing_property:
+                      return to_property_type(
+                           existing_property
+                      )
+                 raise
             db.refresh(new_property)
 
-            asyncio.create_task(
+
+            event_id = str(
+                 uuid.uuid5(
+                      uuid.NAMESPACE_URL,
+                      f"property-cerate: {new_property.id}",
+                 )
+            )
+
+            task = asyncio.create_task(
                  publish_property_created({
+                    "event_id" : event_id,
                     "id": new_property.id,
                     "title": new_property.title,
                     "price": new_property.price,
@@ -55,7 +125,10 @@ class PropertyMutation:
                     "agent_phone": new_property.agent_phone
                  })
             )
-
+            background_tasks.add(task)
+            task.add_done_callback(
+                 background_tasks.discard
+            )
             return PropertyType(
                 id=new_property.id,
                 title=new_property.title,

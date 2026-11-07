@@ -114,11 +114,13 @@ services:
 
   notification-service:
     build: ./notification-service
+    image: estatehub-notification:latest
     restart: unless-stopped
     ports:
       - "8001:8000"
     environment:
       - KAFKA_BROKER=kafka:9092
+      - PYTHONPATH= /app:/app/generated
       - REDIS_URL=redis://redis-notification:6379
       - CELERY_BROKER_URL=redis://redis-notification:6379
       - DATABASE_URL=postgresql://django_user:password123@notification-db:5432/django_db
@@ -155,7 +157,20 @@ services:
     networks:
       - microservices-network
 
+  grpc-server:
+    image: estatehub-notification:latest
+    command: python manage.py run_grpc_server
+    restart: unless-stopped
 
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - GRPC_PORT=50051
+      - PYTHONPATH=/app:/app/generated
+    depends_on:
+      - notification-db
+    networks:
+      - microservices-network
   kafka-consumer:
     build: ./notification-service
     restart: unless-stopped
@@ -223,3 +238,4 @@ volumes:
 networks:
   microservices-network:
     driver: bridge
+

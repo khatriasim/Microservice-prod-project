@@ -46,3 +46,5 @@ chromedriver-autoinstaller
 django-browser-reload
 google-genai
 kafka-python
+grpcio
+grpcio-tools

@@ -196,7 +196,11 @@ export default function AgentsPage() {
                 </div>
 
                 <a
-                  href={`mailto:${agent.email}`}
+                  href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(
+                    agent.email || ""
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="mt-5 inline-flex items-center justify-center gap-1.5 rounded-xl border border-dark-green/15 bg-dark-green/5 px-4 py-2.5 text-sm font-semibold text-dark-green transition duration-200 hover:bg-dark-green hover:text-white"
                 >
                   Contact agent

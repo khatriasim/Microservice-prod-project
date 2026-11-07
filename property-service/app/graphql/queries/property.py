@@ -8,12 +8,13 @@ from app.models.property import Property
 from app.models.user import User
 from app.models.search_log import SearchLog
 from app.core.recommendation import build_user_profile, score_property
-
+from app.core.rate_limit_dependency import rate_limit
+from app.core.rate_limiter import token_bucket
 @strawberry.type
 class PropertyQuery:
 
     @strawberry.field
-    def properties(self, info: Info,
+    async def properties(self, info: Info,
                    city: Optional[str] = None,
                    min_price: Optional[float] = None,
                    max_price: Optional[float] = None,
@@ -29,9 +30,16 @@ class PropertyQuery:
             ])
 
             user_id = info.context.get("user_id")
+            if not user_id:
+                raise Exception("Not authenticated")
+            redis_client = info.context["redis"]
+            await token_bucket.allow_request(
+                redis_client= redis_client,
+                identifier= f"user:{user_id}"
+            )
             if user_id and has_criteria:
                 log = SearchLog(
-                    user_id=int(user_id),
+                    user_id=int(user_id), 
                     city=city,
                     min_price=min_price,
                     max_price=max_price,

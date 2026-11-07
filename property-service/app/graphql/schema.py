@@ -10,6 +10,9 @@ from app.models.user import User
 from fastapi import Request
 from app.core.database import SessionLocal
 from strawberry.fastapi import GraphQLRouter
+from app.core.redis import pool
+import redis.asyncio as redis
+
 
 
 async def get_context(request: Request) -> dict:
@@ -17,6 +20,9 @@ async def get_context(request: Request) -> dict:
         user_id = None
         user_name = None
         user_email = None
+        redis_client = redis.Redis(
+                connection_pool = pool
+        )
 
         token = request.cookies.get("access_token")
         if token:
@@ -31,7 +37,7 @@ async def get_context(request: Request) -> dict:
                         pass
 
 
-        return {"db": db, "user_id": user_id, "user_name":user_name, "user_email":user_email, "request": request}
+        return {"db": db, "user_id": user_id, "request": request, "reids": redis_client,"idempotency_key":request.headers.get("Idempotency-key"),"user_name":user_name, "user_email":user_email, "request": request}
 @strawberry.type
 class Mutation(PropertyMutation, BookingMutation, FavouriteMutation):
                pass
