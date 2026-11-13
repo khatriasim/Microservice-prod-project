@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_MONTHS: int 
     redis_url: str
     kafka_broker: str = "kafka:9092"
+    GRPC_USER_SERVICE_URL: str = "grpc-server:50051"
 
     @field_validator("DEBUG", mode="before")
     @classmethod

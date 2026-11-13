@@ -11,6 +11,8 @@ import uuid
 from app.services.idempotency import ( OPERATION_CREATE_PROPERTY, hash_input, find_existing_idempotency)
 from app.graphql.types.property_type import to_property_type
 from sqlalchemy.exc import IntegrityError
+import grpc
+
 
 background_tasks: set = set()
 @strawberry.type
@@ -26,10 +28,31 @@ class PropertyMutation:
             raise Exception("Not authenticated")
 
         user_id = int(user_id)
+        grpc_client = info.context["user_grpc_client"]
+        try:
+             user = grpc_client.get_user(user_id)
+        except grpc.RpcError as error:
+             if error.code() == grpc.StatusCode.NOT_FOUND:
+                  raise Exception("user account not found")
+             elif error.code() in (
+                  grpc.StatusCode.UNAVAILABLE,
+                  grpc.StatusCode.DEADLINE_EXCEEDED
+             ):
+                  raise Exception("User service is termporarily unavailable") from error
+             raise Exception("unable to verify user account") from error
 
-        idempotency_Key = info.context.get("idpempotency_key")
+        if not user.is_active:
+             raise Exception("YOur account is inactive")
+        if not user.profile_exists:
+             raise Exception("your profile dont exist")
+        if not user.is_agent:
+             raise Exception("only agent can create property")
 
-        if not idempotency_Key:
+     
+
+        idempotency_key = info.context.get("idempotency_key")
+
+        if not idempotency_key:
              raise Exception(
                   "Idempotency key header is required"
              )
@@ -42,7 +65,7 @@ class PropertyMutation:
                  find_existing_idempotency(
                       db=db,
                       user_id=user_id,
-                      key=idempotency_Key,
+                      key=idempotency_key,
                       request_hash=request_hash,
                  )
             )
@@ -75,7 +98,7 @@ class PropertyMutation:
             idempotency_record = IdempotencyKey(
                  user_id=user_id,
                  operation=OPERATION_CREATE_PROPERTY,
-                 key = idempotency_Key,
+                 key = idempotency_key,
                  request_hash = request_hash,
                  resource_id= new_property.id,
             )
@@ -91,7 +114,7 @@ class PropertyMutation:
                       find_existing_idempotency(
                            db=db,
                            user_id=user_id,
-                           key=idempotency_Key,
+                           key=idempotency_key,
                            request_hash=request_hash,
                       )
                  )

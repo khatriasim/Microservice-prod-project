@@ -45,6 +45,7 @@ services:
     ports:
       - "8000:8000"
     environment:
+      - PYTHONPATH=/app:/app/generated
       - DATABASE_URL=postgresql://fastapi_user:password123@property-db:5432/fastapi_db
       - KAFKA_BROKER=kafka:9092
       - REDIS_URL=redis://redis-property:6379
@@ -120,7 +121,7 @@ services:
       - "8001:8000"
     environment:
       - KAFKA_BROKER=kafka:9092
-      - PYTHONPATH= /app:/app/generated
+      - PYTHONPATH=/app:/app/generated
       - REDIS_URL=redis://redis-notification:6379
       - CELERY_BROKER_URL=redis://redis-notification:6379
       - DATABASE_URL=postgresql://django_user:password123@notification-db:5432/django_db
@@ -144,7 +145,8 @@ services:
       - "traefik.http.middlewares.cors.headers.accesscontrolallowcredentials=true"
       - "traefik.http.services.notification.loadbalancer.server.port=8000"
   celery-worker:
-    build: ./notification-service
+    image: estatehub-notification:latest
+    pull_policy: never
     command: celery -A mysite.celry worker --loglevel=info
     environment:
       - CELERY_BROKER_URL=redis://redis-notification:6379
@@ -159,12 +161,12 @@ services:
 
   grpc-server:
     image: estatehub-notification:latest
+    pull_policy: never
     command: python manage.py run_grpc_server
     restart: unless-stopped
-
+    ports:
+      - "50051:50051"
     environment:
-      - DATABASE_URL=${DATABASE_URL}
-      - JWT_SECRET=${JWT_SECRET}
       - GRPC_PORT=50051
       - PYTHONPATH=/app:/app/generated
     depends_on:
@@ -172,7 +174,8 @@ services:
     networks:
       - microservices-network
   kafka-consumer:
-    build: ./notification-service
+    image: estatehub-notification:latest
+    pull_policy: never
     restart: unless-stopped
     command: python manage.py consume_property_events
     environment:

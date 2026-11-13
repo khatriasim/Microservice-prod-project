@@ -18,6 +18,7 @@ from app.api.upload import router as upload_router
 # this, StaticFiles responds with application/octet-stream and Next/Image
 # rejects otherwise valid uploaded WebP files.
 mimetypes.add_type("image/webp", ".webp")
+from app.grpc_client.user_client import UserGrpcClient
 
 
 @asynccontextmanager
@@ -33,11 +34,21 @@ async def lifespan(app: FastAPI):
         await client.close()
     except Exception:
         print("redis not available - skipping") 
-    yield
 
-    if producer:
-        await producer.stop()
-        print("kafak producer stopped")
+    app.state.user_grpc_client = UserGrpcClient(
+        settings.GRPC_USER_SERVICE_URL
+    )
+    print("grpc user client initilized")
+    try:
+        yield
+    finally:
+
+
+        app.state.user_grpc_client.close()
+        print("grpc user client closed")
+        if producer:
+            await producer.stop()
+            print("kafak producer stopped")
 
 app = FastAPI(
     title=settings.APP_NAME,

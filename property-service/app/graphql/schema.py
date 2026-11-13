@@ -37,7 +37,7 @@ async def get_context(request: Request) -> dict:
                         pass
 
 
-        return {"db": db, "user_id": user_id, "request": request, "reids": redis_client,"idempotency_key":request.headers.get("Idempotency-key"),"user_name":user_name, "user_email":user_email, "request": request}
+        return {"db": db, "user_id": user_id, "request": request, "redis": redis_client,"idempotency_key":request.headers.get("Idempotency-key"),"user_name":user_name, "user_grpc_client": request.app.state.user_grpc_client,"user_email":user_email, "request": request}
 @strawberry.type
 class Mutation(PropertyMutation, BookingMutation, FavouriteMutation):
                pass
