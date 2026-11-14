@@ -46,9 +46,7 @@ class PropertyMutation:
         if not user.profile_exists:
              raise Exception("your profile dont exist")
         if not user.is_agent:
-             raise Exception("only agent can create property")
-
-     
+             raise Exception("only agent can create property apply for agent")
 
         idempotency_key = info.context.get("idempotency_key")
 

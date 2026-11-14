@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
@@ -57,6 +57,13 @@ function parsePrice(input) {
   return isNaN(num) ? null : num;
 }
 
+function createIdempotencyKey() {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
 export default function CreatePropertyPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
@@ -80,6 +87,18 @@ export default function CreatePropertyPage() {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [images, setImages] = useState([]);
   const [imageError, setImageError] = useState("");
+  const idempotencyKeyRef = useRef(null);
+
+  const resetIdempotencyKey = () => {
+    idempotencyKeyRef.current = null;
+  };
+
+  const getIdempotencyKey = () => {
+    if (!idempotencyKeyRef.current) {
+      idempotencyKeyRef.current = createIdempotencyKey();
+    }
+    return idempotencyKeyRef.current;
+  };
 
   const propertyTypes = [
     "Apartment",
@@ -110,6 +129,7 @@ export default function CreatePropertyPage() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    resetIdempotencyKey();
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
@@ -118,6 +138,7 @@ export default function CreatePropertyPage() {
 
   const handleImageChange = async (e) => {
     const files = Array.from(e.target.files);
+    resetIdempotencyKey();
     setImageError("");
     const validTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
     const maxSize = 5 * 1024 * 1024; // 5 MB — matches backend
@@ -163,6 +184,7 @@ export default function CreatePropertyPage() {
   };
 
   const removeImage = (index) => {
+    resetIdempotencyKey();
     setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
@@ -195,7 +217,10 @@ export default function CreatePropertyPage() {
     try {
       const res = await fetch(GRAPHQL_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Idempotency-Key": getIdempotencyKey(),
+        },
         credentials: "include",
         body: JSON.stringify({ query: CREATE_PROPERTY_MUTATION, variables }),
       });
@@ -206,6 +231,7 @@ export default function CreatePropertyPage() {
       }
 
       setSubmitSuccess(true);
+      resetIdempotencyKey();
       // Redirect to the property view after a brief moment
       setTimeout(() => {
         router.push(`/view_property?id=${json.data.createProperty.id}`);

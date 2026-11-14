@@ -67,7 +67,7 @@ services:
       - "traefik.http.middlewares.property-ratelimit.ratelimit.burst=40"
       - "traefik.http.middlewares.cors.headers.accesscontrolallowmethods=GET,POST,OPTIONS"
       - "traefik.http.middlewares.cors.headers.accesscontrolalloworiginlist=http://localhost:3000"
-      - "traefik.http.middlewares.cors.headers.accesscontrolallowheaders=Content-Type,Authorization"
+      - "traefik.http.middlewares.cors.headers.accesscontrolallowheaders=Content-Type,Authorization,Idempotency-Key"
       - "traefik.http.middlewares.cors.headers.accesscontrolallowcredentials=true"
       - "traefik.http.services.property.loadbalancer.server.port=8000"
     volumes:
@@ -141,7 +141,7 @@ services:
       - "traefik.http.routers.notification.middlewares=cors"
       - "traefik.http.middlewares.cors.headers.accesscontrolallowmethods=GET,POST,OPTIONS"
       - "traefik.http.middlewares.cors.headers.accesscontrolalloworiginlist=http://localhost:3000"
-      - "traefik.http.middlewares.cors.headers.accesscontrolallowheaders=Content-Type,Authorization"
+      - "traefik.http.middlewares.cors.headers.accesscontrolallowheaders=Content-Type,Authorization,Idempotency-Key"
       - "traefik.http.middlewares.cors.headers.accesscontrolallowcredentials=true"
       - "traefik.http.services.notification.loadbalancer.server.port=8000"
   celery-worker:
